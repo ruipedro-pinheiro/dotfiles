@@ -8,44 +8,19 @@ My personal GNOME setup — not meant to be used as-is, but feel free to poke ar
 
 ## Requirements
 
-`install.sh` requires no sudo — it only creates symlinks into `~`. The dependencies below need to be in place first; how you install them depends on your access level.
+`install.sh` requires no sudo — it only creates symlinks into `~`. The following tools need to be available first.
 
-**With admin rights — Fedora:**
+**Fedora:**
 ```bash
-dnf install kitty neovim fastfetch eza bat lazygit zsh
+sudo dnf install kitty neovim fastfetch eza bat lazygit zsh
 ```
 
-**With admin rights — Ubuntu** (`eza` and `fastfetch` aren't in the default repos):
-```bash
-apt install kitty neovim bat lazygit zsh
-
-# fastfetch
-add-apt-repository ppa:zhangsongcui3371/fastfetch && apt install fastfetch
-
-# eza
-mkdir -p /etc/apt/keyrings
-wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
-  | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
-echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
-  | tee /etc/apt/sources.list.d/gierens.list
-apt update && apt install eza
-```
-
-**Without admin rights** — use [Homebrew](https://brew.sh/) (works on Linux, installs to `~/.linuxbrew`):
-```bash
-# Install Homebrew first (requires curl and git, no sudo)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-# Add to PATH — follow the instructions printed at the end of the installer
-
-brew install kitty neovim fastfetch eza bat lazygit zsh starship zoxide
-```
+**Ubuntu:** tools are expected to already be present. `install.sh` handles the rest without sudo.
 
 After installing zsh, set it as your default shell and log out for the change to take effect:
 ```bash
 chsh -s $(which zsh)
 ```
-
-If `chsh` fails (e.g. the Homebrew zsh path isn't in `/etc/shells`), the included `.bashrc` already does `exec zsh` as a workaround — any bash session will automatically switch to zsh.
 
 **Separate installers (required on both distros):**
 
