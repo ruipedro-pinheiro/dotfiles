@@ -1,52 +1,60 @@
-# ✦ dotfiles
-
-My personal GNOME setup — portable between **Fedora** and **Ubuntu**, terminal-first, keyboard-driven.
-
 ![preview](assets/preview-terminal.png)
 
----
+# dotfiles
 
-## 🧩 What's included
-
-| Config | Description |
-|--------|-------------|
-| `starship.toml` | 2-line prompt — fill bar + time on right, `╰─` connector |
-| `kitty/` | Terminal emulator — Catppuccin Mauve theme, Monaspace font |
-| `fastfetch/` | System info on shell open — image logo, Catppuccin colors |
-| `nvim/` | LazyVim setup with custom plugins |
-| `zshrc` / `bashrc` | Minimal shell config — Starship, zoxide, eza, bat, lazygit |
-| `gnome/` | GNOME dconf dumps + `apply-gnome.sh` to replay the full setup |
-| `icons/Hatter-FluentFiles/` | Merged icon theme — Hatter base + Fluent files/folders for Nautilus |
-| `fonts/Monaspace/` | MonaspiceAr Nerd Font Mono (Regular, Italic, Bold, BoldItalic) |
+GNOME setup on Fedora (primary) and Ubuntu. Terminal-first, keyboard-driven, Catppuccin Mauve everywhere.
 
 ---
 
-## 🎨 Theme stack
+## What's in here
 
-- **Terminal:** [Kitty](https://sw.kovidgoyal.net/kitty/) · [Catppuccin Mauve](https://github.com/catppuccin/kitty)
-- **Prompt:** [Starship](https://starship.rs/)
-- **Shell fetch:** [Fastfetch](https://github.com/fastfetch-cli/fastfetch)
-- **GTK theme:** Catppuccin-Mauve-Dark
-- **Icons:** Hatter-FluentFiles (merged — see below)
-- **Cursor:** Bibata-Modern-Ice
-- **Font:** [Monaspace Argon Nerd Font](https://monaspace.githubnext.com/)
+| Path | What it does |
+|------|--------------|
+| `.zshrc` / `.bashrc` | Shell config — Starship, zoxide, eza, bat, lazygit aliases |
+| `.config/starship.toml` | 2-line prompt: fill bar + clock on the right, `╰─` connector |
+| `.config/kitty/` | Kitty terminal — Catppuccin Mocha theme, Monaspace Argon 15pt |
+| `.config/fastfetch/` | System info on shell open — kitty-direct image, Catppuccin colors |
+| `.config/nvim/` | LazyVim with a few extra plugins |
+| `.config/gnome/` | dconf dumps + `apply-gnome.sh` to replay the full GNOME setup |
+| `.local/share/icons/Hatter-FluentFiles/` | Merged icon theme (see below) |
+| `.local/share/fonts/Monaspace/` | MonaspiceAr Nerd Font Mono (Regular, Italic, Bold, BoldItalic) |
 
 ---
 
-## ⚡ Install
+## Install
 
 ```bash
 git clone https://github.com/ruipedro-pinheiro/dotfiles ~/dotfiles
 cd ~/dotfiles
 ./install.sh
-~/.config/gnome/apply-gnome.sh   # optional — GNOME only
 ```
 
-`install.sh` symlinks everything into `~`. Existing files are backed up to `~/.local/state/dotfiles-install-backups/`.
+`install.sh` symlinks everything into `~`. Existing files are backed up to `~/.local/state/dotfiles-install-backups/` before being replaced.
 
-`apply-gnome.sh` loads the dconf dumps and re-applies the wallpaper. Requires the extensions to be already installed.
+Then optionally, to apply the GNOME settings (extensions must already be installed):
 
-### GNOME extensions used
+```bash
+~/.config/gnome/apply-gnome.sh
+```
+
+No sudo needed — everything goes into `~/.local` or `~/.config`.
+
+---
+
+## Theme
+
+- **Terminal:** [Kitty](https://sw.kovidgoyal.net/kitty/) + [Catppuccin Mocha](https://github.com/catppuccin/kitty)
+- **Prompt:** [Starship](https://starship.rs/)
+- **Shell fetch:** [Fastfetch](https://github.com/fastfetch-cli/fastfetch)
+- **GTK theme:** Catppuccin-Mauve-Dark
+- **Icons:** Hatter-FluentFiles (merged, see below)
+- **Cursor:** Bibata-Modern-Ice
+- **Font:** [Monaspace Argon Nerd Font](https://monaspace.githubnext.com/)
+- **Wallpaper:** [ArtStation — OGaRR6](https://www.artstation.com/artwork/OGaRR6)
+
+---
+
+## GNOME extensions
 
 - [Blur my Shell](https://extensions.gnome.org/extension/3193/blur-my-shell/)
 - [Dash to Dock](https://extensions.gnome.org/extension/307/dash-to-dock/)
@@ -54,26 +62,14 @@ cd ~/dotfiles
 
 ---
 
-## 🗂️ Icon theme
+## Icon theme
 
-`Hatter-FluentFiles` is a **merged theme**, not an overlay:
-
-- Base: [Hatter](https://github.com/zigorki/hatter-icon-theme) (most app icons)
-- File/folder icons for Nautilus: replaced with [Fluent icons](https://github.com/vinceliuice/Fluent-icon-theme)
-
-Stored in `.local/share/icons/Hatter-FluentFiles/` and symlinked by `install.sh`.
+`Hatter-FluentFiles` is a merged theme, not an overlay. The base is [Hatter](https://github.com/zigorki/hatter-icon-theme) for app icons, with file/folder icons swapped out for [Fluent](https://github.com/vinceliuice/Fluent-icon-theme) ones so Nautilus looks consistent with the rest of the desktop.
 
 ---
 
-## 🖋️ Font
+## Notes
 
-A minimal subset of **MonaspiceAr Nerd Font Mono** is bundled (Regular, Italic, Bold, BoldItalic). `install.sh` runs `fc-cache` automatically.
-
----
-
-## 📝 Notes
-
-- **No sudo required** — everything installs into `~/.local` or `~/.config`
 - Tested on Fedora 43 (Wayland) and Ubuntu 24.04 (X11)
-- `Blur my Shell` may conflict with workspace animations on GNOME 49+ — disable app blur if needed
-- The `nvim/` config is a standalone [LazyVim](https://lazyvim.org/) setup; it manages its own plugins
+- `Blur my Shell` can conflict with workspace animations on GNOME 49+ — disable app blur if it causes issues
+- The `nvim/` config is a standalone [LazyVim](https://lazyvim.org/) setup and manages its own plugins
