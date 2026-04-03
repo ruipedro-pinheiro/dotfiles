@@ -1,0 +1,13 @@
+
+# <type>: <description courte>
+#
+# Types: fix | add | refactor | norm | docs | wip
+#
+# fix:      bug corrigé
+# add:      nouvelle fonction/feature
+# refactor: code réorganisé (pas de changement fonctionnel)
+# norm:     corrections norminette
+# docs:     README, comments
+# wip:      work in progress (pas fini)
+#
+# Exemple: fix: infinite loop in free_stack

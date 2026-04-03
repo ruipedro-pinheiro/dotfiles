@@ -1,0 +1,16 @@
+[/]
+accent-color='teal'
+color-scheme='default'
+cursor-size=32
+cursor-theme='Bibata-Modern-Ice'
+document-font-name='Adwaita Sans 11'
+enable-animations=true
+font-antialiasing='rgba'
+font-hinting='full'
+font-name='Adwaita Sans 11'
+gtk-theme='Catppuccin-Mauve-Dark'
+icon-theme='Hatter-FluentFiles'
+monospace-font-name='MonaspiceAr Nerd Font Mono 16'
+show-battery-percentage=true
+text-scaling-factor=1.0
+toolkit-accessibility=false

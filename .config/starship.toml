@@ -1,0 +1,134 @@
+"$schema" = "https://starship.rs/config-schema.json"
+
+command_timeout = 1500
+scan_timeout = 30
+add_newline = true
+follow_symlinks = true
+palette = "catppuccin_mocha"
+
+format = """\
+$username\
+[ / ](fg:surface1)\
+$directory\
+$git_branch\
+$git_status\
+$fill\
+$time\
+$line_break\
+[╰─](fg:overlay0)\
+$character"""
+
+right_format = ""
+
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0dc"
+flamingo  = "#f2cdcd"
+pink      = "#f5c2e7"
+mauve     = "#cba6f7"
+red       = "#f38ba8"
+maroon    = "#eba0ac"
+peach     = "#fab387"
+yellow    = "#f9e2af"
+green     = "#a6e3a1"
+teal      = "#94e2d5"
+sky       = "#89dceb"
+sapphire  = "#74c7ec"
+blue      = "#89b4fa"
+lavender  = "#b4befe"
+text      = "#cdd6f4"
+subtext1  = "#bac2de"
+subtext0  = "#a6adc8"
+overlay2  = "#9399b2"
+overlay1  = "#7f849c"
+overlay0  = "#6c7086"
+surface2  = "#585b70"
+surface1  = "#45475a"
+surface0  = "#313244"
+base      = "#1e1e2e"
+mantle    = "#181825"
+crust     = "#11111b"
+[username]
+show_always = true
+style_user = "fg:lavender bold"
+style_root = "fg:red bold"
+format = "[╭─  $user]($style)"
+
+[directory]
+style = "fg:subtext1 bold"
+format = "[ $path]($style)"
+truncation_length = 4
+truncate_to_repo = false
+truncation_symbol = "…/"
+home_symbol = "~"
+
+[git_branch]
+symbol = ""
+style = "fg:blue bold"
+format = "[ / ](fg:surface1)[$symbol $branch]($style)"
+
+[git_status]
+style = "fg:peach bold"
+format = "[ $all_status$ahead_behind]($style)"
+conflicted = "⚡ "
+ahead      = "↑${count} "
+behind     = "↓${count} "
+diverged   = "↕ "
+up_to_date = ""
+untracked  = "? "
+stashed    = "≡ "
+modified   = "● "
+staged     = "✔ "
+renamed    = "↳ "
+deleted    = "− "
+
+[fill]
+symbol = "─"
+style = "fg:surface0"
+
+[time]
+disabled = false
+time_format = "%H:%M"
+style = "fg:subtext0 bold"
+format = "[ $time]($style)"
+
+[cmd_duration]
+min_time = 2000
+style = "fg:overlay1"
+format = "[⏱ $duration ]($style)"
+
+[c]
+symbol = ""
+style = "fg:sapphire"
+format = "[$symbol $version ]($style)"
+detect_extensions = ["c", "h"]
+
+[python]
+symbol = ""
+style = "fg:yellow"
+format = "[$symbol $version ]($style)"
+
+[nodejs]
+symbol = ""
+style = "fg:green"
+format = "[$symbol $version ]($style)"
+
+[rust]
+symbol = ""
+style = "fg:peach"
+format = "[$symbol $version ]($style)"
+
+[golang]
+symbol = ""
+style = "fg:sky"
+format = "[$symbol $version ]($style)"
+
+[docker_context]
+symbol = ""
+style = "fg:sky"
+format = "[$symbol $context ]($style)"
+
+[character]
+success_symbol        = "[❯](bold lavender)"
+error_symbol          = "[❯](bold red)"
+vimcmd_symbol         = "[❮](bold lavender)"
+vimcmd_replace_symbol = "[❮](bold red)"

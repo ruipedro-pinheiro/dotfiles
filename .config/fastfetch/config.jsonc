@@ -1,0 +1,142 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "kitty-direct",
+    "source": "$HOME/.config/fastfetch/wallhaven-pol5qp-fastfetch-portrait-soft.png",
+    "width": 26,
+    "height": 17,
+    "padding": {
+      "top": 0,
+      "left": 2,
+      "right": 3
+    }
+  },
+  "display": {
+    "pipe": false,
+    "separator": " : ",
+    "key": {
+      "width": 16,
+      "type": "both",
+      "paddingLeft": 0
+    },
+    "color": {
+      "keys": "#b4befe",
+      "title": "#b4befe",
+      "output": "#cdd6f4",
+      "separator": "#585b70"
+    }
+  },
+  "modules": [
+    {
+      "type": "os",
+      "key": "OS",
+      "keyIcon": "",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "host",
+      "key": "Host",
+      "keyIcon": "󰇺",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "kernel",
+      "key": "Kernel",
+      "keyIcon": "",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "uptime",
+      "key": "Uptime",
+      "keyIcon": "󰅐",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "packages",
+      "key": "Pkgs",
+      "keyIcon": "󰏗",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "shell",
+      "key": "Shell",
+      "keyIcon": "",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "display",
+      "key": "Display",
+      "keyIcon": "󰍹",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "de",
+      "key": "DE",
+      "keyIcon": "󰧨",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "terminal",
+      "key": "Terminal",
+      "keyIcon": "",
+      "keyColor": "#b4befe"
+    },
+    "break",
+    {
+      "type": "cpu",
+      "key": "CPU",
+      "keyIcon": "",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "gpu",
+      "key": "GPU",
+      "keyIcon": "󰢮",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "memory",
+      "key": "Memory",
+      "keyIcon": "󰍛",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "swap",
+      "key": "Swap",
+      "keyIcon": "󰓡",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "disk",
+      "key": "Disk",
+      "keyIcon": "󰋊",
+      "keyColor": "#b4befe",
+      "showRegular": true,
+      "showExternal": false,
+      "showHidden": false,
+      "showSubvolumes": false,
+      "showReadOnly": true,
+      "showUnknown": false,
+      "folders": "/"
+    },
+    {
+      "type": "localip",
+      "key": "Local IP",
+      "keyIcon": "󰩠",
+      "keyColor": "#b4befe"
+    },
+    {
+      "type": "battery",
+      "key": "Battery",
+      "keyIcon": "󰂄",
+      "keyColor": "#b4befe",
+      "format": "{4} [{5}]"
+    },
+    {
+      "type": "poweradapter",
+      "key": "Power",
+      "keyIcon": "󰚥",
+      "keyColor": "#b4befe"
+    }
+  ]
+}
