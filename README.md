@@ -8,34 +8,44 @@ My personal GNOME setup — not meant to be used as-is, but feel free to poke ar
 
 ## Requirements
 
-`install.sh` only creates symlinks and moves existing files to a backup directory — it installs nothing. The items below must be in place first.
+`install.sh` requires no sudo — it only creates symlinks into `~`. The dependencies below need to be in place first; how you install them depends on your access level.
 
-**Fedora:**
+**With admin rights — Fedora:**
 ```bash
-sudo dnf install kitty neovim fastfetch eza bat lazygit zsh
+dnf install kitty neovim fastfetch eza bat lazygit zsh
 ```
 
-**Ubuntu** — `eza` and `fastfetch` are not in the default repos:
+**With admin rights — Ubuntu** (`eza` and `fastfetch` aren't in the default repos):
 ```bash
-sudo apt install kitty neovim bat lazygit zsh
+apt install kitty neovim bat lazygit zsh
 
 # fastfetch
-sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
-sudo apt update && sudo apt install fastfetch
+add-apt-repository ppa:zhangsongcui3371/fastfetch && apt install fastfetch
 
-# eza — add the community repo
-sudo mkdir -p /etc/apt/keyrings
+# eza
+mkdir -p /etc/apt/keyrings
 wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
-  | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+  | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
 echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" \
-  | sudo tee /etc/apt/sources.list.d/gierens.list
-sudo apt update && sudo apt install eza
+  | tee /etc/apt/sources.list.d/gierens.list
+apt update && apt install eza
 ```
 
-After installing zsh, set it as your default shell (applies to both distros) and log out for the change to take effect:
+**Without admin rights** — use [Homebrew](https://brew.sh/) (works on Linux, installs to `~/.linuxbrew`):
+```bash
+# Install Homebrew first (requires curl and git, no sudo)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+# Add to PATH — follow the instructions printed at the end of the installer
+
+brew install kitty neovim fastfetch eza bat lazygit zsh starship zoxide
+```
+
+After installing zsh, set it as your default shell and log out for the change to take effect:
 ```bash
 chsh -s $(which zsh)
 ```
+
+If `chsh` fails (e.g. the Homebrew zsh path isn't in `/etc/shells`), the included `.bashrc` already does `exec zsh` as a workaround — any bash session will automatically switch to zsh.
 
 **Separate installers (required on both distros):**
 
