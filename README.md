@@ -50,7 +50,7 @@ No sudo needed — everything goes into `~/.local` or `~/.config`.
 - **Icons:** Hatter-FluentFiles (merged, see below)
 - **Cursor:** Bibata-Modern-Ice
 - **Font:** [Monaspace Argon Nerd Font](https://monaspace.githubnext.com/)
-- **Wallpaper:** [ArtStation — OGaRR6](https://www.artstation.com/artwork/OGaRR6)
+- **Wallpaper:** [ArtStation — Moe Wanders](https://www.artstation.com/artwork/OGaRR6)
 
 ---
 
