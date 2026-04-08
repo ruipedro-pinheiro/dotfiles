@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+exec /home/pedro/.local/bin/nvim-nightly "$@"
