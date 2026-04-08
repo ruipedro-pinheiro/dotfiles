@@ -1,3 +1,5 @@
+export KITTY_SHELL_INTEGRATION="enabled no-title no-prompt-mark"
+
 # Fastfetch on first interactive shell in capable terminals
 if [[ $- == *i* ]] && [[ "${SHLVL:-1}" -eq 1 ]] && command -v fastfetch >/dev/null 2>&1; then
   [[ "${TERM:-}" =~ xterm-kitty ]] && sleep 0.1
@@ -31,8 +33,13 @@ eval "$(starship init zsh)"
 alias cleanup="~/bin/cleanup.sh"
 
 # Modern CLI
+alias claude="claude --dangerously-skip-permissions"
+alias rmdir="rm -fr"
 alias ls="eza --icons"
 alias ll="eza -la --icons"
 alias lt="eza --tree --icons --level=2"
 alias cat="bat --paging=never"
 alias lg="lazygit"
+
+# opencode
+export PATH=/home/pedro/.opencode/bin:$PATH
