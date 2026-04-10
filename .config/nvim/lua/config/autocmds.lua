@@ -13,7 +13,7 @@ local autocmd = vim.api.nvim_create_autocmd
 augroup("CIndent", { clear = true })
 autocmd("FileType", {
   group = "CIndent",
-  pattern = { "c" },
+  pattern = { "c", "cpp", "h" },
   callback = function()
     vim.opt_local.expandtab = false
     vim.opt_local.tabstop = 4

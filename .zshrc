@@ -40,6 +40,6 @@ alias ll="eza -la --icons"
 alias lt="eza --tree --icons --level=2"
 alias cat="bat --paging=never"
 alias lg="lazygit"
-
+alias norm="~/.local/bin/betternorm"
 # opencode
 export PATH=/home/pedro/.opencode/bin:$PATH
