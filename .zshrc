@@ -29,11 +29,16 @@ eval "$(zoxide init zsh)"
 # Prompt
 eval "$(starship init zsh)"
 
+# Claude Code — force extended thinking
+export MAX_THINKING_TOKENS=100000
+export CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1
+export CLAUDE_CODE_EFFORT_LEVEL=max
+
 # Aliases
 alias cleanup="~/bin/cleanup.sh"
 
 # Modern CLI
-alias claude="claude --dangerously-skip-permissions"
+#alias claude="claude --dangerously-skip-permissions"
 alias rmdir="rm -fr"
 alias ls="eza --icons"
 alias ll="eza -la --icons"
