@@ -147,31 +147,6 @@ restore_required_repo_assets() {
   done
 }
 
-cleanup_stale_local_tools() {
-  local tool path resolved
-
-  mkdir -p "$HOME/.local/bin"
-
-  for tool in bat eza fastfetch gdb lazygit lazycommit lazycommit-edit starship zoxide; do
-    path="$HOME/.local/bin/$tool"
-    if [ ! -e "$path" ] && [ ! -L "$path" ]; then
-      continue
-    fi
-
-    if [ -L "$path" ]; then
-      resolved="$(readlink -f "$path" || true)"
-      if [ "$tool" = "lazycommit-edit" ] && [ "$resolved" = "$REPO_DIR/bin/lazycommit-edit" ]; then
-        continue
-      fi
-      rm -f "$path"
-    elif [ -f "$path" ]; then
-      rm -f "$path"
-    else
-      printf 'Skipping non-file local tool path: %s\n' "$path" >&2
-    fi
-  done
-}
-
 prepare_shell() {
   local custom="$HOME/.oh-my-zsh/custom"
   local autosuggestions="$custom/plugins/zsh-autosuggestions"
@@ -217,11 +192,14 @@ install_release_binary() {
   local repo="$1"
   local asset_regex="$2"
   local binary_name="$3"
-  local metadata url digest checksum asset_name tmp archive
+  local metadata url digest checksum asset_name tmp archive version_output
 
   require_commands curl python3 sha256sum install
 
-  metadata="$(release_asset_metadata "$repo" "$asset_regex")"
+  if ! metadata="$(release_asset_metadata "$repo" "$asset_regex")"; then
+    printf 'Unable to resolve a verified release for %s.\n' "$binary_name" >&2
+    return 1
+  fi
   url="${metadata%%$'\t'*}"
   digest="${metadata#*$'\t'}"
   checksum="${digest#sha256:}"
@@ -229,16 +207,29 @@ install_release_binary() {
   tmp="$(mktemp -d "$TMP_ROOT/release.XXXXXX")"
   archive="$tmp/$asset_name"
 
-  curl -fsSL "$url" -o "$archive"
-  printf '%s  %s\n' "$checksum" "$archive" | sha256sum -c -
+  if ! curl -fsSL "$url" -o "$archive"; then
+    printf 'Download failed for %s.\n' "$binary_name" >&2
+    rm -rf "$tmp"
+    return 1
+  fi
+  if ! printf '%s  %s\n' "$checksum" "$archive" | sha256sum -c -; then
+    printf 'Checksum verification failed for %s.\n' "$binary_name" >&2
+    rm -rf "$tmp"
+    return 1
+  fi
 
-  python3 "$REPO_DIR/scripts/extract-release-binary.py" \
-    "$archive" "$binary_name" "$STAGED_BIN/$binary_name"
-  if ! "$STAGED_BIN/$binary_name" --version >/dev/null 2>&1; then
-    printf 'Downloaded %s cannot run on this system; refusing activation.\n' "$binary_name" >&2
+  if ! python3 "$REPO_DIR/scripts/extract-release-binary.py" \
+    "$archive" "$binary_name" "$STAGED_BIN/$binary_name"; then
+    printf 'Extraction failed for %s.\n' "$binary_name" >&2
+    rm -rf "$tmp"
+    return 1
+  fi
+  if ! version_output="$("$STAGED_BIN/$binary_name" --version 2>&1)"; then
+    printf 'Downloaded %s cannot run on this system; refusing activation.\n%s\n' "$binary_name" "$version_output" >&2
     rm -f "$STAGED_BIN/$binary_name"
     return 1
   fi
+  printf 'Validated staged executable: %s (%s)\n' "$binary_name" "$(printf '%s' "$version_output" | head -n 1)"
   rm -rf "$tmp"
 }
 
@@ -457,17 +448,32 @@ stage_all_assets() {
 }
 
 activate_tools() {
-  local tool
+  local tool candidate target version_output
 
   log_phase 'Activating CLI tools'
   mkdir -p "$HOME/.local/bin"
-  cleanup_stale_local_tools
   for tool in bat eza fastfetch gdb lazygit lazycommit starship zoxide; do
-    install -m 0755 "$STAGED_BIN/$tool" "$HOME/.local/bin/$tool"
-    if [ -x "$HOME/.local/bin/$tool" ]; then
-      printf 'Installed executable: %s\n' "$HOME/.local/bin/$tool"
+    target="$HOME/.local/bin/$tool"
+    if [ ! -x "$STAGED_BIN/$tool" ]; then
+      if [ -x "$target" ]; then
+        printf 'Keeping existing executable: %s\n' "$target" >&2
+      else
+        printf 'WARNING: no validated executable available for %s\n' "$tool" >&2
+      fi
+      continue
+    fi
+    candidate="$HOME/.local/bin/.$tool.new.$$"
+    if install -m 0755 "$STAGED_BIN/$tool" "$candidate" \
+      && version_output="$("$candidate" --version 2>&1)"; then
+      if mv -f "$candidate" "$target"; then
+        printf 'Installed executable: %s (%s)\n' "$target" "$(printf '%s' "$version_output" | head -n 1)"
+      else
+        rm -f "$candidate"
+        printf 'WARNING: atomic replacement failed for %s; existing executable preserved.\n' "$tool" >&2
+      fi
     else
-      printf 'WARNING: executable missing after install: %s\n' "$HOME/.local/bin/$tool" >&2
+      rm -f "$candidate"
+      printf 'WARNING: activation validation failed for %s; existing executable preserved.\n%s\n' "$tool" "$version_output" >&2
     fi
   done
   install -m 0755 "$REPO_DIR/bin/lazycommit-edit" "$HOME/.local/bin/lazycommit-edit"
