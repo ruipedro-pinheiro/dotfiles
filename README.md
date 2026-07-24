@@ -36,7 +36,7 @@ the rest of the install unaffected.
 ## Install
 
 ```bash
-git clone --recurse-submodules https://github.com/ruipedro-pinheiro/dotfiles \
+git clone --recurse-submodules git@github.com:ruipedro-pinheiro/dotfiles.git \
   "$HOME/.local/share/dotfiles"
 "$HOME/.local/share/dotfiles/install.sh"
 ```
