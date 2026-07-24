@@ -75,7 +75,7 @@ assert_contains "$install_sh" '\$TMP_ROOT/zsh-autosuggestions' 'zsh plugins must
 assert_contains "$install_sh" 'backup_item' 'existing shell plugins must be backed up before replacement'
 assert_not_contains "$install_sh" 'flashfetch' 'flashfetch must not be installed'
 assert_contains "$install_sh" 'TMP_ROOT=' 'installer must use one disposable temp root'
-assert_contains "$install_sh" "trap 'rm -rf \"\\\$TMP_ROOT\"' EXIT" 'temporary downloads must be removed on every exit'
+assert_contains "$install_sh" 'trap .*rm -rf "\$TMP_ROOT".* EXIT' 'temporary downloads must be removed on every exit'
 assert_contains "$install_sh" 'prune_backups\(\)' 'old dotfiles backups must be pruned'
 assert_contains "$install_sh" 'MAX_BACKUPS=1' 'only one dotfiles backup may be retained'
 assert_contains "$install_sh" 'MIN_FREE_MB=2048' 'installer must reserve 2 GiB of free space'
@@ -122,6 +122,7 @@ assert_contains "$apply_gnome_sh" 'preflight' 'apply-gnome must preflight before
 assert_contains "$apply_gnome_sh" 'dotfiles-gnome-dconf\.snapshot' 'apply-gnome must keep one bounded dconf safety snapshot'
 assert_contains "$apply_gnome_sh" 'trap .*rollback_dconf.*ERR' 'apply-gnome must rollback dconf on partial failure'
 assert_contains "$install_sh" 'dotfiles-install\.log' 'installer must keep a persistent per-run log'
+assert_contains "$install_sh" 'Starting dotfiles install' 'installer must print an immediate startup marker'
 assert_contains "$install_sh" '--repair-desktop' 'installer must provide desktop repair mode'
 assert_contains "$install_sh" 'stage_gnome_assets required' 'desktop repair must run outside an active GNOME session'
 assert_contains "$install_sh" 'stage_all_assets' 'installer must stage downloadable assets'
@@ -162,7 +163,7 @@ fi
 [ -z "$isolated_error" ] || fail ".zshrc emitted errors without optional dependencies: $isolated_error"
 
 pull_line="$(grep -n 'git -C "\$HOME/\.local/share/dotfiles" pull --ff-only' "$repo_dir/README.md" | cut -d: -f1 || true)"
-install_line="$(grep -n '^"\$HOME/\.local/share/dotfiles/install\.sh"$' "$repo_dir/README.md" | cut -d: -f1 | tail -n 1 || true)"
+install_line="$(grep -n '^bash "\$HOME/\.local/share/dotfiles/install\.sh"$' "$repo_dir/README.md" | cut -d: -f1 | tail -n 1 || true)"
 exec_line="$(grep -n '^exec zsh$' "$repo_dir/README.md" | cut -d: -f1 | tail -n 1 || true)"
 [ -n "$pull_line" ] && [ -n "$install_line" ] && [ -n "$exec_line" ] || fail 'README reinstall command sequence is incomplete'
 [ "$pull_line" -lt "$install_line" ] && [ "$install_line" -lt "$exec_line" ] || fail 'README reinstall commands must be ordered pull, install, exec zsh'

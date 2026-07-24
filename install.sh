@@ -11,12 +11,9 @@ BACKUP_BASE="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-install-backups"
 BACKUP_ROOT="$BACKUP_BASE/$(date +%Y%m%d-%H%M%S)"
 MAX_BACKUPS=1
 MIN_FREE_MB=2048
-TMP_ROOT="$(mktemp -d)"
-STAGED_BIN="$TMP_ROOT/bin"
-STAGED_GNOME="$TMP_ROOT/gnome"
+TMP_ROOT=''
 GNOME_ASSETS_STAGED=0
-trap 'rm -rf "$TMP_ROOT"' EXIT
-mkdir -p "$STAGED_BIN" "$STAGED_GNOME"
+trap '[ -z "${TMP_ROOT:-}" ] || rm -rf "$TMP_ROOT"' EXIT
 
 mkdir -p "$(dirname "$LOG_FILE")"
 : > "$LOG_FILE"
@@ -26,6 +23,12 @@ else
   exec >> "$LOG_FILE" 2>&1
 fi
 trap 'status=$?; printf "ERROR: install.sh:%s exited %s while running: %s\n" "$LINENO" "$status" "$BASH_COMMAND" >&2; exit "$status"' ERR
+printf 'Starting dotfiles install for %s from %s\n' "$TARGET_HOME" "$REPO_DIR"
+
+TMP_ROOT="$(mktemp -d)"
+STAGED_BIN="$TMP_ROOT/bin"
+STAGED_GNOME="$TMP_ROOT/gnome"
+mkdir -p "$STAGED_BIN" "$STAGED_GNOME"
 
 log_phase() {
   printf '\n==> %s\n' "$1"

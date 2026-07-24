@@ -8,7 +8,7 @@ Run these commands from the existing 42 installation:
 
 ```bash
 git -C "$HOME/.local/share/dotfiles" pull --ff-only
-"$HOME/.local/share/dotfiles/install.sh"
+bash "$HOME/.local/share/dotfiles/install.sh"
 exec zsh
 ```
 
@@ -19,7 +19,7 @@ Kitty, Zsh, Git, curl, Python 3, `install`, and `sha256sum` must already be avai
 ```bash
 git clone --recurse-submodules git@github.com:ruipedro-pinheiro/dotfiles.git \
   "$HOME/.local/share/dotfiles"
-"$HOME/.local/share/dotfiles/install.sh"
+bash "$HOME/.local/share/dotfiles/install.sh"
 exec zsh
 ```
 
@@ -38,13 +38,13 @@ Kitty and Zsh use the versions already installed by 42. The installer does not u
 This skips Neovim, shell plugins, and CLI tool installation:
 
 ```bash
-"$HOME/.local/share/dotfiles/install.sh" --repair-desktop
+bash "$HOME/.local/share/dotfiles/install.sh" --repair-desktop
 ```
 
 Keep the current wallpaper with:
 
 ```bash
-APPLY_WALLPAPER=0 "$HOME/.local/share/dotfiles/install.sh"
+APPLY_WALLPAPER=0 bash "$HOME/.local/share/dotfiles/install.sh"
 ```
 
 ## Log
