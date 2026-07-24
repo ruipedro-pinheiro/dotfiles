@@ -130,10 +130,8 @@ link_core_line="$(grep -n '^link_core_dotfiles()' "$install_sh" | cut -d: -f1)"
 [ -n "$stage_gnome_line" ] && [ -n "$link_core_line" ] || fail 'GNOME stage/link order markers missing'
 [ "$stage_gnome_line" -lt "$link_core_line" ] || fail 'GNOME assets must be staged before HOME links or dconf changes'
 
-assert_contains "$zshrc" 'dangerously-load-development-channels server:ai-bridge-channel' '.zshrc must include Claude ai-bridge alias'
-assert_contains "$zshrc" 'opencode\(\)' '.zshrc must include opencode fixed-port wrapper'
-assert_contains "$zshrc" '\$HOME/\.opencode/bin' '.zshrc must use $HOME for opencode PATH'
-assert_contains "$zshrc" '\$HOME/\.spicetify' '.zshrc must use $HOME for spicetify PATH'
+assert_not_contains "$zshrc" 'claude|opencode|betternorm|spicetify' '.zshrc must not publish personal tool configuration'
+assert_not_contains "$zshrc" 'alias rmdir=' '.zshrc must not replace the standard rmdir command'
 assert_not_contains "$zshrc" 'MAX_THINKING_TOKENS|CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING|CLAUDE_CODE_EFFORT_LEVEL' '.zshrc must remove old Claude thinking env'
 assert_not_contains "$zshrc" '~/bin/' '.zshrc must not require a visible ~/bin directory'
 assert_contains "$zshrc" '\[ -r "\$ZSH/oh-my-zsh\.sh" \]' '.zshrc must tolerate missing Oh My Zsh during desktop repair'

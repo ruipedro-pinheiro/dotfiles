@@ -32,12 +32,7 @@ command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
 # Prompt
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 
-# Claude Code ai-bridge channel
-alias claude='claude --dangerously-load-development-channels server:ai-bridge-channel'
-
 # Modern CLI
-#alias claude="claude --dangerously-skip-permissions"
-alias rmdir="rm -fr"
 if command -v eza >/dev/null 2>&1; then
   alias ls="eza --icons"
   alias ll="eza -la --icons"
@@ -45,20 +40,3 @@ if command -v eza >/dev/null 2>&1; then
 fi
 command -v bat >/dev/null 2>&1 && alias cat="bat --paging=never"
 command -v lazygit >/dev/null 2>&1 && alias lg="lazygit"
-[ -x "$HOME/.local/bin/betternorm" ] && alias norm="$HOME/.local/bin/betternorm"
-
-# opencode
-export PATH="$HOME/.opencode/bin:$PATH"
-
-# Fixed server port so the agent-bridge daemon can wake the TUI.
-# Only applies to the bare TUI launch; subcommands (mcp, serve, run...) break
-# if --port is inserted before them, so they pass through untouched.
-opencode() {
-  if [ $# -eq 0 ]; then
-    command opencode --port 14096
-  else
-    command opencode "$@"
-  fi
-}
-
-export PATH="$PATH:$HOME/.spicetify"
