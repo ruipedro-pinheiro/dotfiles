@@ -146,7 +146,7 @@ assert_contains "$zshrc" 'command -v bat' '.zshrc must not replace cat when opti
 assert_contains "$zshrc" 'command -v lazygit' '.zshrc must not define lg when optional LazyGit is unavailable'
 assert_not_contains "$repo_dir/README.md" '~/dotfiles' 'README must keep the home directory root clean'
 assert_contains "$repo_dir/README.md" '\$HOME/\.local/share/dotfiles' 'README must use the XDG data location'
-assert_contains "$repo_dir/README.md" 'Kitty and Zsh are system prerequisites; `install\.sh` only links their configuration' 'README must state that Kitty and Zsh binaries remain system-provided'
+assert_contains "$repo_dir/README.md" 'Kitty and Zsh use the versions already installed by 42' 'README must state that Kitty and Zsh binaries remain system-provided'
 
 isolated_home="$(mktemp -d)"
 trap 'rm -rf "$isolated_home"' EXIT
@@ -157,7 +157,7 @@ fi
 
 pull_line="$(grep -n 'git -C "\$HOME/\.local/share/dotfiles" pull --ff-only' "$repo_dir/README.md" | cut -d: -f1 || true)"
 install_line="$(grep -n '^"\$HOME/\.local/share/dotfiles/install\.sh"$' "$repo_dir/README.md" | cut -d: -f1 | tail -n 1 || true)"
-exec_line="$(grep -n '^exec zsh$' "$repo_dir/README.md" | cut -d: -f1 || true)"
+exec_line="$(grep -n '^exec zsh$' "$repo_dir/README.md" | cut -d: -f1 | tail -n 1 || true)"
 [ -n "$pull_line" ] && [ -n "$install_line" ] && [ -n "$exec_line" ] || fail 'README reinstall command sequence is incomplete'
 [ "$pull_line" -lt "$install_line" ] && [ "$install_line" -lt "$exec_line" ] || fail 'README reinstall commands must be ordered pull, install, exec zsh'
 
