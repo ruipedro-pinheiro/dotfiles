@@ -38,15 +38,16 @@ chsh -s $(which zsh)
 ## Install
 
 ```bash
-git clone --recurse-submodules https://github.com/ruipedro-pinheiro/dotfiles ~/dotfiles
-cd ~/dotfiles
-./install.sh
+git clone --recurse-submodules https://github.com/ruipedro-pinheiro/dotfiles \
+  "$HOME/.local/share/dotfiles"
+"$HOME/.local/share/dotfiles/install.sh"
 ```
 
-Creates symlinks pointing into `~/dotfiles` — `.zshrc` and `.bashrc` land in
-`~`, everything else goes under `~/.config/` or `~/.local/share/`. A clone made
-without `--recurse-submodules` is supported: `install.sh` initializes the
-submodules automatically. The font cache is updated automatically.
+Creates symlinks pointing into `~/.local/share/dotfiles`. Only the hidden shell
+files `.zshrc` and `.bashrc` land directly in `~`; everything else stays under
+`~/.config/` or `~/.local/share/`. A clone made without `--recurse-submodules`
+is supported: `install.sh` initializes the submodules automatically. The font
+cache is updated automatically.
 
 Neovim comes from the
 [`ruipedro-pinheiro/nvim`](https://github.com/ruipedro-pinheiro/nvim)

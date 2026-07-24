@@ -33,9 +33,6 @@ eval "$(starship init zsh)"
 # Claude Code ai-bridge channel
 alias claude='claude --dangerously-load-development-channels server:ai-bridge-channel'
 
-# Aliases
-alias cleanup="~/bin/cleanup.sh"
-
 # Modern CLI
 #alias claude="claude --dangerously-skip-permissions"
 alias rmdir="rm -fr"

@@ -90,6 +90,9 @@ assert_contains "$zshrc" 'opencode\(\)' '.zshrc must include opencode fixed-port
 assert_contains "$zshrc" '\$HOME/\.opencode/bin' '.zshrc must use $HOME for opencode PATH'
 assert_contains "$zshrc" '\$HOME/\.spicetify' '.zshrc must use $HOME for spicetify PATH'
 assert_not_contains "$zshrc" 'MAX_THINKING_TOKENS|CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING|CLAUDE_CODE_EFFORT_LEVEL' '.zshrc must remove old Claude thinking env'
+assert_not_contains "$zshrc" '~/bin/' '.zshrc must not require a visible ~/bin directory'
+assert_not_contains "$repo_dir/README.md" '~/dotfiles' 'README must keep the home directory root clean'
+assert_contains "$repo_dir/README.md" '\$HOME/\.local/share/dotfiles' 'README must use the XDG data location'
 
 lg_alias_count="$(grep -Ec '^alias lg=' "$zshrc")"
 [ "$lg_alias_count" -eq 1 ] || fail ".zshrc must define alias lg exactly once (found $lg_alias_count)"
