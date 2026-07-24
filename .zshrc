@@ -11,8 +11,10 @@ fi
 export ZSH="$HOME/.oh-my-zsh"
 export ZSH_CUSTOM="$HOME/.local/share/oh-my-zsh-custom"
 ZSH_THEME=""
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
-source $ZSH/oh-my-zsh.sh
+plugins=(git)
+[ -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ] && plugins+=(zsh-autosuggestions)
+[ -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ] && plugins+=(zsh-syntax-highlighting)
+[ -r "$ZSH/oh-my-zsh.sh" ] && source "$ZSH/oh-my-zsh.sh"
 
 # Environment
 export PATH="$HOME/.local/bin:$HOME/go/bin:$HOME/.bun/bin:$PATH"
@@ -25,10 +27,10 @@ export BUN_INSTALL="$HOME/.bun"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # Zoxide (smart cd)
-eval "$(zoxide init zsh)"
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
 
 # Prompt
-eval "$(starship init zsh)"
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 
 # Claude Code ai-bridge channel
 alias claude='claude --dangerously-load-development-channels server:ai-bridge-channel'
@@ -36,12 +38,14 @@ alias claude='claude --dangerously-load-development-channels server:ai-bridge-ch
 # Modern CLI
 #alias claude="claude --dangerously-skip-permissions"
 alias rmdir="rm -fr"
-alias ls="eza --icons"
-alias ll="eza -la --icons"
-alias lt="eza --tree --icons --level=2"
-alias cat="bat --paging=never"
-alias lg="lazygit"
-alias norm="~/.local/bin/betternorm"
+if command -v eza >/dev/null 2>&1; then
+  alias ls="eza --icons"
+  alias ll="eza -la --icons"
+  alias lt="eza --tree --icons --level=2"
+fi
+command -v bat >/dev/null 2>&1 && alias cat="bat --paging=never"
+command -v lazygit >/dev/null 2>&1 && alias lg="lazygit"
+[ -x "$HOME/.local/bin/betternorm" ] && alias norm="$HOME/.local/bin/betternorm"
 
 # opencode
 export PATH="$HOME/.opencode/bin:$PATH"

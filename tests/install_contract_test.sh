@@ -26,7 +26,7 @@ assert_not_contains() {
 
 bash -n "$install_sh"
 bash -n "$apply_gnome_sh"
-bash -n "$zshrc"
+zsh -n "$zshrc"
 
 assert_contains "$gitmodules" 'path = \.config/nvim' 'nvim must be a git submodule'
 assert_contains "$gitmodules" 'url = https://github\.com/ruipedro-pinheiro/nvim\.git' 'nvim submodule must use the canonical repo'
@@ -136,11 +136,30 @@ assert_contains "$zshrc" '\$HOME/\.opencode/bin' '.zshrc must use $HOME for open
 assert_contains "$zshrc" '\$HOME/\.spicetify' '.zshrc must use $HOME for spicetify PATH'
 assert_not_contains "$zshrc" 'MAX_THINKING_TOKENS|CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING|CLAUDE_CODE_EFFORT_LEVEL' '.zshrc must remove old Claude thinking env'
 assert_not_contains "$zshrc" '~/bin/' '.zshrc must not require a visible ~/bin directory'
+assert_contains "$zshrc" '\[ -r "\$ZSH/oh-my-zsh\.sh" \]' '.zshrc must tolerate missing Oh My Zsh during desktop repair'
+assert_contains "$zshrc" 'command -v zoxide' '.zshrc must guard optional zoxide initialization'
+assert_contains "$zshrc" 'command -v starship' '.zshrc must guard optional Starship initialization'
+assert_contains "$zshrc" 'command -v eza' '.zshrc must not replace ls when optional eza is unavailable'
+assert_contains "$zshrc" 'command -v bat' '.zshrc must not replace cat when optional bat is unavailable'
+assert_contains "$zshrc" 'command -v lazygit' '.zshrc must not define lg when optional LazyGit is unavailable'
 assert_not_contains "$repo_dir/README.md" '~/dotfiles' 'README must keep the home directory root clean'
 assert_contains "$repo_dir/README.md" '\$HOME/\.local/share/dotfiles' 'README must use the XDG data location'
 assert_contains "$repo_dir/README.md" 'Kitty and Zsh are system prerequisites; `install\.sh` only links their configuration' 'README must state that Kitty and Zsh binaries remain system-provided'
 
-lg_alias_count="$(grep -Ec '^alias lg=' "$zshrc")"
+isolated_home="$(mktemp -d)"
+trap 'rm -rf "$isolated_home"' EXIT
+if ! isolated_error="$(HOME="$isolated_home" PATH=/usr/bin:/bin zsh -dfc "source '$zshrc'" 2>&1)"; then
+  fail '.zshrc must load without optional user-local dependencies'
+fi
+[ -z "$isolated_error" ] || fail ".zshrc emitted errors without optional dependencies: $isolated_error"
+
+pull_line="$(grep -n 'git -C "\$HOME/\.local/share/dotfiles" pull --ff-only' "$repo_dir/README.md" | cut -d: -f1 || true)"
+repair_line="$(grep -n 'install\.sh" --repair-desktop' "$repo_dir/README.md" | cut -d: -f1 || true)"
+exec_line="$(grep -n '^exec zsh$' "$repo_dir/README.md" | cut -d: -f1 || true)"
+[ -n "$pull_line" ] && [ -n "$repair_line" ] && [ -n "$exec_line" ] || fail 'README recovery command sequence is incomplete'
+[ "$pull_line" -lt "$repair_line" ] && [ "$repair_line" -lt "$exec_line" ] || fail 'README recovery commands must be ordered pull, repair, exec zsh'
+
+lg_alias_count="$(grep -Ec 'alias lg=' "$zshrc" || true)"
 [ "$lg_alias_count" -eq 1 ] || fail ".zshrc must define alias lg exactly once (found $lg_alias_count)"
 
 printf 'install contract tests passed\n'

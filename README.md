@@ -31,11 +31,6 @@ GNOME Shell major version, enables extensions where possible, and loads GNOME
 settings. Missing GNOME commands outside GNOME produce a short warning and leave
 the rest of the install unaffected.
 
-After installing zsh, set it as your default shell and log out for the change to take effect:
-```bash
-chsh -s $(which zsh)
-```
-
 ---
 
 ## Install
@@ -77,7 +72,9 @@ restages GNOME assets, relinks shell/config/font/icon/theme/background files,
 reinstalls extensions, reapplies GNOME settings, and refreshes fonts:
 
 ```bash
+git -C "$HOME/.local/share/dotfiles" pull --ff-only
 "$HOME/.local/share/dotfiles/install.sh" --repair-desktop
+exec zsh
 ```
 
 Each run truncates and rewrites `~/.local/state/dotfiles-install.log` with clear
@@ -101,7 +98,7 @@ dconf and wallpaper `gsettings` are skipped.
 | Path | Notes |
 |------|-------|
 | `.zshrc` | Starship + zoxide init, eza/bat/lazygit aliases, runs fastfetch on first interactive shell start |
-| `.bashrc` | Re-execs zsh — nothing else runs |
+| `.bashrc` | Bash fallback configuration; Zsh is already the default shell at 42 |
 | `.config/starship.toml` | 2-line prompt — fill bar pushes time to the right edge, `╰─` connector on line 2 |
 | `.config/kitty/` | Catppuccin Mocha, Monaspace Argon 16pt |
 | `.config/fastfetch/` | kitty-direct image protocol, Catppuccin colors — active image is `wallhaven-pol5qp-fastfetch-portrait-soft.png`, other variants included |
