@@ -262,7 +262,12 @@ install_latest_eza() {
 }
 
 install_latest_fastfetch() {
-  install_release_binary 'fastfetch-cli/fastfetch' 'fastfetch-musl-amd64\.tar\.gz' 'fastfetch'
+  install_release_binary 'fastfetch-cli/fastfetch' 'fastfetch-linux-amd64\.tar\.gz' 'fastfetch'
+  if ! "$STAGED_BIN/fastfetch" --version; then
+    printf 'WARNING: staged Fastfetch cannot run on this system.\n' >&2
+    rm -f "$STAGED_BIN/fastfetch"
+    return 1
+  fi
 }
 
 install_latest_starship() {
