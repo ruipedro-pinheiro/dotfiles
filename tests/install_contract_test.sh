@@ -152,10 +152,10 @@ fi
 [ -z "$isolated_error" ] || fail ".zshrc emitted errors without optional dependencies: $isolated_error"
 
 pull_line="$(grep -n 'git -C "\$HOME/\.local/share/dotfiles" pull --ff-only' "$repo_dir/README.md" | cut -d: -f1 || true)"
-repair_line="$(grep -n 'install\.sh" --repair-desktop' "$repo_dir/README.md" | cut -d: -f1 || true)"
+install_line="$(grep -n '^"\$HOME/\.local/share/dotfiles/install\.sh"$' "$repo_dir/README.md" | cut -d: -f1 | tail -n 1 || true)"
 exec_line="$(grep -n '^exec zsh$' "$repo_dir/README.md" | cut -d: -f1 || true)"
-[ -n "$pull_line" ] && [ -n "$repair_line" ] && [ -n "$exec_line" ] || fail 'README recovery command sequence is incomplete'
-[ "$pull_line" -lt "$repair_line" ] && [ "$repair_line" -lt "$exec_line" ] || fail 'README recovery commands must be ordered pull, repair, exec zsh'
+[ -n "$pull_line" ] && [ -n "$install_line" ] && [ -n "$exec_line" ] || fail 'README reinstall command sequence is incomplete'
+[ "$pull_line" -lt "$install_line" ] && [ "$install_line" -lt "$exec_line" ] || fail 'README reinstall commands must be ordered pull, install, exec zsh'
 
 lg_alias_count="$(grep -Ec 'alias lg=' "$zshrc" || true)"
 [ "$lg_alias_count" -eq 1 ] || fail ".zshrc must define alias lg exactly once (found $lg_alias_count)"

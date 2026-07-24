@@ -67,14 +67,18 @@ default. To keep the current wallpaper during installation:
 APPLY_WALLPAPER=0 "$HOME/.local/share/dotfiles/install.sh"
 ```
 
-Desktop recovery mode skips CLI tool downloads and the Neovim rebuild, then
-restages GNOME assets, relinks shell/config/font/icon/theme/background files,
-reinstalls extensions, reapplies GNOME settings, and refreshes fonts:
+For a complete reinstall on a 42 workstation, run these commands in order:
 
 ```bash
 git -C "$HOME/.local/share/dotfiles" pull --ff-only
-"$HOME/.local/share/dotfiles/install.sh" --repair-desktop
+"$HOME/.local/share/dotfiles/install.sh"
 exec zsh
+```
+
+Desktop-only recovery skips shell plugins, CLI tools, and the Neovim rebuild:
+
+```bash
+"$HOME/.local/share/dotfiles/install.sh" --repair-desktop
 ```
 
 Each run truncates and rewrites `~/.local/state/dotfiles-install.log` with clear
