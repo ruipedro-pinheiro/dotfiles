@@ -53,4 +53,4 @@ APPLY_WALLPAPER=0 "$HOME/.local/share/dotfiles/install.sh"
 cat "$HOME/.local/state/dotfiles-install.log"
 ```
 
-Existing files are backed up under `~/.local/state/dotfiles-install-backups/`. Only the newest backup is retained.
+The installer copies every configuration into `$HOME`; it does not create symlinks. Existing files are backed up under `~/.local/state/dotfiles-install-backups/`. Only the newest backup is retained.

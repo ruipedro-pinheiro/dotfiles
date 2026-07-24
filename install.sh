@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+TARGET_HOME='/home/rpinheir'
+HOME="$TARGET_HOME"
+export HOME
 REPO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-install.log"
 BACKUP_BASE="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-install-backups"
@@ -91,27 +94,21 @@ backup_item() {
   mv "$target" "$backup"
 }
 
-link_item() {
+copy_item() {
   local source="$1"
   local target="$2"
-  local rel backup
 
   mkdir -p "$(dirname "$target")"
-
-  if [ -L "$target" ]; then
-    if [ "$(readlink -f "$target")" = "$source" ]; then
-      return
-    fi
-  fi
-
   if [ -e "$target" ] || [ -L "$target" ]; then
-    rel="${target#"$HOME"/}"
-    backup="$BACKUP_ROOT/$rel"
-    mkdir -p "$(dirname "$backup")"
-    mv "$target" "$backup"
+    backup_item "$target"
   fi
-
-  ln -sfn "$source" "$target"
+  if [ -d "$source" ]; then
+    mkdir -p "$target"
+    cp -a "$source/." "$target/"
+    rm -f "$target/.git"
+  else
+    cp -a "$source" "$target"
+  fi
 }
 
 prepare_nvim() {
@@ -121,7 +118,7 @@ prepare_nvim() {
     printf 'Expected nvim submodule installer not found.\n' >&2
     exit 1
   fi
-  link_item "$REPO_DIR/.config/nvim" "$HOME/.config/nvim"
+  copy_item "$REPO_DIR/.config/nvim" "$HOME/.config/nvim"
   bash "$REPO_DIR/.config/nvim/install.sh"
 }
 
@@ -163,7 +160,7 @@ prepare_shell() {
     "$staged_autosuggestions"
   git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting \
     "$staged_highlighting"
-  link_item "$REPO_DIR/.oh-my-zsh" "$HOME/.oh-my-zsh"
+  copy_item "$REPO_DIR/.oh-my-zsh" "$HOME/.oh-my-zsh"
   mkdir -p "$custom/plugins"
   backup_item "$autosuggestions"
   backup_item "$highlighting"
@@ -393,6 +390,7 @@ activate_gnome_customization() {
   mkdir -p "$HOME/.local/share/icons" "$HOME/.local/share/themes"
   backup_item "$HOME/.local/share/icons/Bibata-Modern-Ice"
   mv "$STAGED_GNOME/Bibata-Modern-Ice" "$HOME/.local/share/icons/Bibata-Modern-Ice"
+  copy_item "$HOME/.local/share/icons/Bibata-Modern-Ice" "$HOME/.icons/Bibata-Modern-Ice"
 
   activate_gnome_extension 'blur-my-shell@aunetx'
   activate_gnome_extension 'dash-to-dock@micxgx.gmail.com'
@@ -438,24 +436,27 @@ activate_tools() {
   for tool in bat eza fastfetch gdb lazygit lazycommit starship zoxide; do
     install -m 0755 "$STAGED_BIN/$tool" "$HOME/.local/bin/$tool"
   done
-  link_item "$REPO_DIR/bin/lazycommit-edit" "$HOME/.local/bin/lazycommit-edit"
+  install -m 0755 "$REPO_DIR/bin/lazycommit-edit" "$HOME/.local/bin/lazycommit-edit"
 }
 
 link_core_dotfiles() {
-  log_phase 'Linking core dotfiles'
-  link_item "$REPO_DIR/.bashrc" "$HOME/.bashrc"
-  link_item "$REPO_DIR/.zshrc" "$HOME/.zshrc"
-  link_item "$REPO_DIR/.config/starship.toml" "$HOME/.config/starship.toml"
-  link_item "$REPO_DIR/.config/background" "$HOME/.config/background"
-  link_item "$REPO_DIR/.config/gnome" "$HOME/.config/gnome"
-  link_item "$REPO_DIR/.config/kitty" "$HOME/.config/kitty"
-  link_item "$REPO_DIR/.config/fastfetch" "$HOME/.config/fastfetch"
-  link_item "$REPO_DIR/.config/lazygit" "$HOME/.config/lazygit"
-  link_item "$REPO_DIR/.config/zed" "$HOME/.config/zed"
-  link_item "$REPO_DIR/.config/btop" "$HOME/.config/btop"
-  link_item "$REPO_DIR/.local/share/fonts/Monaspace" "$HOME/.local/share/fonts/Monaspace"
-  link_item "$REPO_DIR/.local/share/icons/Hatter-FluentFiles" "$HOME/.local/share/icons/Hatter-FluentFiles"
-  link_item "$REPO_DIR/.themes/Catppuccin-Mauve-Dark" "$HOME/.local/share/themes/Catppuccin-Mauve-Dark"
+  log_phase 'Installing core dotfiles'
+  copy_item "$REPO_DIR/.bashrc" "$HOME/.bashrc"
+  copy_item "$REPO_DIR/.zshrc" "$HOME/.zshrc"
+  printf 'Zsh configuration installed: %s bytes at %s\n' "$(wc -c < "$HOME/.zshrc")" "$HOME/.zshrc"
+  copy_item "$REPO_DIR/.config/starship.toml" "$HOME/.config/starship.toml"
+  copy_item "$REPO_DIR/.config/background" "$HOME/.config/background"
+  copy_item "$REPO_DIR/.config/gnome" "$HOME/.config/gnome"
+  copy_item "$REPO_DIR/.config/kitty" "$HOME/.config/kitty"
+  copy_item "$REPO_DIR/.config/fastfetch" "$HOME/.config/fastfetch"
+  copy_item "$REPO_DIR/.config/lazygit" "$HOME/.config/lazygit"
+  copy_item "$REPO_DIR/.config/zed" "$HOME/.config/zed"
+  copy_item "$REPO_DIR/.config/btop" "$HOME/.config/btop"
+  copy_item "$REPO_DIR/.local/share/fonts/Monaspace" "$HOME/.local/share/fonts/Monaspace"
+  copy_item "$REPO_DIR/.local/share/icons/Hatter-FluentFiles" "$HOME/.local/share/icons/Hatter-FluentFiles"
+  copy_item "$REPO_DIR/.local/share/icons/Hatter-FluentFiles" "$HOME/.icons/Hatter-FluentFiles"
+  copy_item "$REPO_DIR/.themes/Catppuccin-Mauve-Dark" "$HOME/.local/share/themes/Catppuccin-Mauve-Dark"
+  copy_item "$REPO_DIR/.themes/Catppuccin-Mauve-Dark" "$HOME/.themes/Catppuccin-Mauve-Dark"
 }
 
 refresh_fonts() {

@@ -25,13 +25,14 @@ assert_not_contains() {
 }
 
 bash -n "$install_sh"
+assert_contains "$install_sh" "TARGET_HOME='/home/rpinheir'" '42 installation must target /home/rpinheir explicitly'
 bash -n "$apply_gnome_sh"
 zsh -n "$zshrc"
 
 assert_contains "$gitmodules" 'path = \.config/nvim' 'nvim must be a git submodule'
 assert_contains "$gitmodules" 'url = https://github\.com/ruipedro-pinheiro/nvim\.git' 'nvim submodule must use the canonical repo'
 assert_contains "$install_sh" 'submodule update --init --recursive' 'install.sh must initialize the nvim submodule'
-assert_contains "$install_sh" 'link_item "\$REPO_DIR/\.config/nvim"' 'install.sh must link the nvim submodule'
+assert_contains "$install_sh" 'copy_item "\$REPO_DIR/\.config/nvim"' 'install.sh must copy the nvim submodule configuration'
 assert_not_contains "$install_sh" 'git clone .*ruipedro-pinheiro/nvim' 'install.sh must not create a second nvim clone'
 assert_contains "$install_sh" 'install_latest_lazygit\(\)' 'install.sh must install latest lazygit'
 assert_contains "$install_sh" 'install_latest_lazycommit\(\)' 'install.sh must install latest lazycommit'
@@ -58,14 +59,15 @@ for path in \
   '.config/lazygit' \
   '.config/zed' \
   '.config/btop'; do
-  assert_contains "$install_sh" "link_item \"\\\$REPO_DIR/$path" "install.sh must link $path"
+  assert_contains "$install_sh" "copy_item \"\\\$REPO_DIR/$path" "install.sh must copy $path"
 done
 assert_not_contains "$install_sh" 'ghostty' 'Ghostty must not be managed by this repo'
 
 assert_contains "$install_sh" 'for tool in bat eza fastfetch gdb lazygit lazycommit lazycommit-edit starship zoxide' 'stale local tool cleanup list is incomplete'
-assert_contains "$install_sh" 'link_item "\$REPO_DIR/\.oh-my-zsh"' 'Oh My Zsh submodule must be linked'
-assert_contains "$install_sh" 'link_item "\$REPO_DIR/\.zshrc" "\$HOME/\.zshrc"' 'system Zsh configuration must be linked'
-assert_contains "$install_sh" 'link_item "\$REPO_DIR/\.config/kitty" "\$HOME/\.config/kitty"' 'system Kitty configuration must be linked'
+assert_contains "$install_sh" 'copy_item "\$REPO_DIR/\.oh-my-zsh"' 'Oh My Zsh submodule must be copied'
+assert_contains "$install_sh" 'copy_item "\$REPO_DIR/\.zshrc" "\$HOME/\.zshrc"' 'system Zsh configuration must be copied'
+assert_contains "$install_sh" 'Zsh configuration installed:' 'installer log must show the copied zshrc size'
+assert_contains "$install_sh" 'copy_item "\$REPO_DIR/\.config/kitty" "\$HOME/\.config/kitty"' 'system Kitty configuration must be copied'
 assert_not_contains "$install_sh" 'zsh-bin|kovidgoyal/kitty|kitty-[^ ]*x86_64' 'installer must not download system-provided Zsh or Kitty binaries'
 assert_contains "$install_sh" 'zsh-users/zsh-autosuggestions' 'zsh-autosuggestions install missing'
 assert_contains "$install_sh" 'zsh-users/zsh-syntax-highlighting' 'zsh-syntax-highlighting install missing'
@@ -82,7 +84,11 @@ assert_contains "$install_sh" 'for path in "\$HOME" "\$TMP_ROOT"' 'temporary fil
 assert_contains "$install_sh" 'fastfetch-musl-amd64' 'fastfetch must use the self-contained musl build'
 assert_contains "$install_sh" 'extract-release-binary\.py' 'safe release extractor must be used'
 assert_not_contains "$install_sh" 'tar -x' 'release archives must not be extracted as directory trees'
-assert_contains "$install_sh" 'link_item "\$REPO_DIR/\.themes/Catppuccin-Mauve-Dark" "\$HOME/\.local/share/themes/Catppuccin-Mauve-Dark"' 'Catppuccin GTK theme must be linked automatically'
+assert_contains "$install_sh" 'copy_item "\$REPO_DIR/\.themes/Catppuccin-Mauve-Dark" "\$HOME/\.local/share/themes/Catppuccin-Mauve-Dark"' 'Catppuccin GTK theme must be copied automatically'
+assert_not_contains "$install_sh" 'ln -s' 'installer must copy configuration instead of creating symlinks'
+assert_contains "$install_sh" '"\$HOME/\.themes/Catppuccin-Mauve-Dark"' 'Catppuccin GTK theme must support the GNOME 42 legacy path'
+assert_contains "$install_sh" '"\$HOME/\.icons/Hatter-FluentFiles"' 'Hatter icons must support the GNOME 42 legacy path'
+assert_contains "$install_sh" '"\$HOME/\.icons/Bibata-Modern-Ice"' 'Bibata cursor must support the GNOME 42 legacy path'
 assert_contains "$install_sh" 'Bibata-Modern-Ice\.tar\.xz' 'Bibata cursor archive name missing'
 assert_contains "$install_sh" 'a68cae60c4dc706350e194ebc91c5fe48bc7bc9d59e119555834a2a7ee5078ef' 'Bibata cursor checksum missing'
 assert_contains "$install_sh" 'extract-cursor-theme\.py' 'Bibata cursor archive must use the safe cursor extractor'
