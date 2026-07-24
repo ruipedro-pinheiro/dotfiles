@@ -3,6 +3,7 @@ set -euo pipefail
 
 repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 install_sh="$repo_dir/install.sh"
+apply_gnome_sh="$repo_dir/.config/gnome/apply-gnome.sh"
 zshrc="$repo_dir/.zshrc"
 gitmodules="$repo_dir/.gitmodules"
 
@@ -24,6 +25,7 @@ assert_not_contains() {
 }
 
 bash -n "$install_sh"
+bash -n "$apply_gnome_sh"
 bash -n "$zshrc"
 
 assert_contains "$gitmodules" 'path = \.config/nvim' 'nvim must be a git submodule'
@@ -62,6 +64,9 @@ assert_not_contains "$install_sh" 'ghostty' 'Ghostty must not be managed by this
 
 assert_contains "$install_sh" 'for tool in bat eza fastfetch gdb lazygit lazycommit lazycommit-edit starship zoxide' 'stale local tool cleanup list is incomplete'
 assert_contains "$install_sh" 'link_item "\$REPO_DIR/\.oh-my-zsh"' 'Oh My Zsh submodule must be linked'
+assert_contains "$install_sh" 'link_item "\$REPO_DIR/\.zshrc" "\$HOME/\.zshrc"' 'system Zsh configuration must be linked'
+assert_contains "$install_sh" 'link_item "\$REPO_DIR/\.config/kitty" "\$HOME/\.config/kitty"' 'system Kitty configuration must be linked'
+assert_not_contains "$install_sh" 'zsh-bin|kovidgoyal/kitty|kitty-[^ ]*x86_64' 'installer must not download system-provided Zsh or Kitty binaries'
 assert_contains "$install_sh" 'zsh-users/zsh-autosuggestions' 'zsh-autosuggestions install missing'
 assert_contains "$install_sh" 'zsh-users/zsh-syntax-highlighting' 'zsh-syntax-highlighting install missing'
 assert_contains "$install_sh" '\$TMP_ROOT/zsh-autosuggestions' 'zsh plugins must be staged before replacement'
@@ -77,13 +82,53 @@ assert_contains "$install_sh" 'for path in "\$HOME" "\$TMP_ROOT"' 'temporary fil
 assert_contains "$install_sh" 'fastfetch-musl-amd64' 'fastfetch must use the self-contained musl build'
 assert_contains "$install_sh" 'extract-release-binary\.py' 'safe release extractor must be used'
 assert_not_contains "$install_sh" 'tar -x' 'release archives must not be extracted as directory trees'
+assert_contains "$install_sh" 'link_item "\$REPO_DIR/\.themes/Catppuccin-Mauve-Dark" "\$HOME/\.local/share/themes/Catppuccin-Mauve-Dark"' 'Catppuccin GTK theme must be linked automatically'
+assert_contains "$install_sh" 'Bibata-Modern-Ice\.tar\.xz' 'Bibata cursor archive name missing'
+assert_contains "$install_sh" 'a68cae60c4dc706350e194ebc91c5fe48bc7bc9d59e119555834a2a7ee5078ef' 'Bibata cursor checksum missing'
+assert_contains "$install_sh" 'extract-cursor-theme\.py' 'Bibata cursor archive must use the safe cursor extractor'
+assert_contains "$install_sh" 'gnome-extension-resolver\.py' 'GNOME extension download URLs must be resolver-validated'
+assert_contains "$install_sh" 'extension-info/\?pk=\$extension_id&shell_version=\$shell_major' 'GNOME extensions must resolve against detected Shell major version'
+assert_contains "$install_sh" 'blur-my-shell@aunetx' 'Blur my Shell extension UUID missing'
+assert_contains "$install_sh" 'dash-to-dock@micxgx\.gmail\.com' 'Dash to Dock extension UUID missing'
+assert_contains "$install_sh" 'user-theme@gnome-shell-extensions\.gcampax\.github\.com' 'User Themes extension UUID missing'
+assert_contains "$install_sh" 'just-perfection-desktop@just-perfection' 'Just Perfection extension UUID missing'
+assert_contains "$install_sh" 'caffeine@patapon\.info' 'Caffeine extension UUID missing'
+assert_contains "$install_sh" 'clipboard-indicator@tudmotu\.com' 'Clipboard Indicator extension UUID missing'
+assert_contains "$install_sh" 'appindicatorsupport@rgcjonas\.gmail\.com' 'AppIndicator extension UUID missing'
+assert_contains "$install_sh" 'places-menu@gnome-shell-extensions\.gcampax\.github\.com' 'Places Menu extension UUID missing'
+assert_contains "$install_sh" 'apps-menu@gnome-shell-extensions\.gcampax\.github\.com' 'Applications Menu extension UUID missing'
+assert_contains "$install_sh" 'GNOME automation skipped:' 'non-GNOME installs must skip with one concise warning'
+assert_contains "$install_sh" 'command -v dconf' 'GNOME staging preflight must require dconf before HOME mutation'
+assert_contains "$install_sh" 'command -v gsettings' 'GNOME staging preflight must require gsettings before HOME mutation'
+assert_contains "$install_sh" 'preflight_gnome_session_write\(\)' 'GNOME staging must verify the settings session before HOME mutation'
+assert_contains "$install_sh" 'gsettings writable org\.gnome\.desktop\.interface gtk-theme' 'GNOME session preflight must verify a writable setting'
+assert_contains "$install_sh" 'gsettings set org\.gnome\.desktop\.interface gtk-theme' 'GNOME session preflight must prove writes using the unchanged value'
+assert_contains "$install_sh" '\.config/gnome/apply-gnome\.sh' 'installer must apply GNOME settings after GNOME assets'
+assert_not_contains "$install_sh" 'sudo' 'installer must remain no-sudo'
+assert_contains "$apply_gnome_sh" 'desktop-background\.dconf' 'wallpaper dconf must be applied only by the opt-in branch'
+assert_contains "$apply_gnome_sh" 'APPLY_WALLPAPER:-1' 'wallpaper changes must be on by default'
+assert_contains "$apply_gnome_sh" 'APPLY_WALLPAPER:-1\}" != "0"' 'wallpaper changes must allow APPLY_WALLPAPER=0 opt-out'
+assert_contains "$apply_gnome_sh" 'preflight' 'apply-gnome must preflight before dconf mutation'
+assert_contains "$apply_gnome_sh" 'dotfiles-gnome-dconf\.snapshot' 'apply-gnome must keep one bounded dconf safety snapshot'
+assert_contains "$apply_gnome_sh" 'trap .*rollback_dconf.*ERR' 'apply-gnome must rollback dconf on partial failure'
+assert_contains "$install_sh" 'dotfiles-install\.log' 'installer must keep a persistent per-run log'
+assert_contains "$install_sh" '--repair-desktop' 'installer must provide desktop repair mode'
+assert_contains "$install_sh" 'stage_gnome_assets required' 'desktop repair must run outside an active GNOME session'
+assert_contains "$install_sh" 'stage_all_assets' 'installer must stage assets before HOME mutation'
+assert_contains "$install_sh" 'link_core_dotfiles' 'repair mode must relink core dotfiles including zshrc'
+assert_contains "$install_sh" 'Unknown argument' 'installer must reject unknown arguments'
 
-last_download_line="$(grep -n '^install_latest_starship$' "$install_sh" | cut -d: -f1)"
-activate_line="$(grep -n '^activate_tools$' "$install_sh" | cut -d: -f1)"
-shell_line="$(grep -n '^prepare_shell$' "$install_sh" | cut -d: -f1)"
+last_download_line="$(grep -n '^  stage_all_assets$' "$install_sh" | cut -d: -f1)"
+activate_line="$(grep -n '^  activate_tools$' "$install_sh" | cut -d: -f1)"
+shell_line="$(grep -n '^  prepare_shell$' "$install_sh" | cut -d: -f1)"
 [ -n "$last_download_line" ] && [ -n "$activate_line" ] || fail 'tool staging order markers missing'
 [ "$last_download_line" -lt "$activate_line" ] || fail 'old tools must remain until every replacement is staged'
 [ -n "$shell_line" ] && [ "$last_download_line" -lt "$shell_line" ] || fail 'release failures must occur before shell configuration changes'
+
+stage_gnome_line="$(grep -n '^stage_gnome_assets()' "$install_sh" | cut -d: -f1)"
+link_core_line="$(grep -n '^link_core_dotfiles()' "$install_sh" | cut -d: -f1)"
+[ -n "$stage_gnome_line" ] && [ -n "$link_core_line" ] || fail 'GNOME stage/link order markers missing'
+[ "$stage_gnome_line" -lt "$link_core_line" ] || fail 'GNOME assets must be staged before HOME links or dconf changes'
 
 assert_contains "$zshrc" 'dangerously-load-development-channels server:ai-bridge-channel' '.zshrc must include Claude ai-bridge alias'
 assert_contains "$zshrc" 'opencode\(\)' '.zshrc must include opencode fixed-port wrapper'
@@ -93,6 +138,7 @@ assert_not_contains "$zshrc" 'MAX_THINKING_TOKENS|CLAUDE_CODE_DISABLE_ADAPTIVE_T
 assert_not_contains "$zshrc" '~/bin/' '.zshrc must not require a visible ~/bin directory'
 assert_not_contains "$repo_dir/README.md" '~/dotfiles' 'README must keep the home directory root clean'
 assert_contains "$repo_dir/README.md" '\$HOME/\.local/share/dotfiles' 'README must use the XDG data location'
+assert_contains "$repo_dir/README.md" 'Kitty and Zsh are system prerequisites; `install\.sh` only links their configuration' 'README must state that Kitty and Zsh binaries remain system-provided'
 
 lg_alias_count="$(grep -Ec '^alias lg=' "$zshrc")"
 [ "$lg_alias_count" -eq 1 ] || fail ".zshrc must define alias lg exactly once (found $lg_alias_count)"

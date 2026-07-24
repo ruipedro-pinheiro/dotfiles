@@ -9,8 +9,8 @@ My personal GNOME setup — not meant to be used as-is, but feel free to poke ar
 ## Requirements
 
 `install.sh` requires no sudo. It creates symlinks, initializes the Neovim
-submodule, and installs user-local CLI tools. The following tools need to be
-available first.
+submodule, installs user-local CLI tools, and applies GNOME customization when a
+GNOME session is detected. The following tools need to be available first.
 
 **Fedora:**
 ```bash
@@ -20,18 +20,21 @@ sudo dnf install kitty zsh git curl tar python3
 **Ubuntu:** Kitty and zsh must be available. The standard 42 environment also
 needs `git`, `curl`, `tar`, `python3`, `find`, `install`, and `sha256sum`.
 
+Kitty and Zsh are system prerequisites; `install.sh` only links their configuration.
+
 The installer fetches verified current releases of bat, eza, Fastfetch,
 Starship, zoxide, LazyGit, LazyCommit, and portable GDB. It also initializes Oh
-My Zsh, zsh-autosuggestions, zsh-syntax-highlighting, and Neovim nightly.
+My Zsh, zsh-autosuggestions, zsh-syntax-highlighting, and Neovim nightly. In a
+GNOME session, it links the vendored Catppuccin GTK theme, installs the verified
+Bibata cursor archive, installs the configured GNOME extensions for the detected
+GNOME Shell major version, enables extensions where possible, and loads GNOME
+settings. Missing GNOME commands outside GNOME produce a short warning and leave
+the rest of the install unaffected.
 
 After installing zsh, set it as your default shell and log out for the change to take effect:
 ```bash
 chsh -s $(which zsh)
 ```
-
-**GNOME theme and cursor** (not in any package manager — install manually):
-- GTK: [Catppuccin GTK](https://github.com/catppuccin/gtk) — install `Catppuccin-Mauve-Dark` to `~/.local/share/themes/`
-- Cursor: [Bibata-Modern-Ice](https://github.com/ful1e5/Bibata_Cursor) — install to `~/.local/share/icons/`
 
 ---
 
@@ -61,13 +64,35 @@ Before replacing anything, existing files are moved to
 backup is retained to fit restricted home quotas. The installer also requires
 at least 2 GiB of free space before downloading or changing the setup.
 
-To apply GNOME settings, install all extensions listed in the [GNOME extensions](#gnome-extensions) section first, then:
+GNOME settings are applied automatically by `install.sh` after themes,
+extensions, and the cursor are staged. The bundled wallpaper is applied by
+default. To keep the current wallpaper during installation:
 
 ```bash
-~/.config/gnome/apply-gnome.sh
+APPLY_WALLPAPER=0 "$HOME/.local/share/dotfiles/install.sh"
 ```
 
-Loads dconf dumps for interface settings (GTK theme, cursor, icon theme, font), desktop background, window manager preferences, shell config, and extension settings for Dash to Dock, Blur my Shell, and User Themes. The other extensions in the list are active but their settings aren't in the dump — they'll load with defaults. Finishes by overriding the wallpaper path via `gsettings` to point at `~/.config/background` for the current user (both light and dark variants).
+Desktop recovery mode skips CLI tool downloads and the Neovim rebuild, then
+restages GNOME assets, relinks shell/config/font/icon/theme/background files,
+reinstalls extensions, reapplies GNOME settings, and refreshes fonts:
+
+```bash
+"$HOME/.local/share/dotfiles/install.sh" --repair-desktop
+```
+
+Each run truncates and rewrites `~/.local/state/dotfiles-install.log` with clear
+phase messages and command failures.
+
+`~/.config/gnome/apply-gnome.sh` can also be run later. It loads dconf dumps for
+interface settings (GTK theme, cursor, icon theme, font), window manager
+preferences, shell config, and extension settings for Dash to Dock, Blur my
+Shell, and User Themes. The dconf enabled-extension list remains authoritative
+when a GNOME Shell restart is required before `gnome-extensions enable` can take
+effect. `apply-gnome.sh` preflights the wallpaper, GTK theme, cursor theme, icon
+theme, required extensions, `dconf`, and `gsettings` before changing settings.
+It stores one bounded dconf safety snapshot in XDG state and restores it if a
+partial dconf/gsettings failure occurs. With `APPLY_WALLPAPER=0`, background
+dconf and wallpaper `gsettings` are skipped.
 
 ---
 
@@ -85,8 +110,9 @@ Loads dconf dumps for interface settings (GTK theme, cursor, icon theme, font), 
 | `.config/zed/` | Zed editor theme, Vim mode, and privacy settings |
 | `.config/btop/` | btop layout, theme, and monitoring preferences |
 | `.config/gnome/` | dconf dumps + `apply-gnome.sh` |
-| `.config/background` | Wallpaper file — `install.sh` links it into `~/.config/background`; `apply-gnome.sh` points GNOME at that path |
+| `.config/background` | Wallpaper file — `install.sh` links it into `~/.config/background`; GNOME points at it unless `APPLY_WALLPAPER=0` is set |
 | `.local/share/icons/Hatter-FluentFiles/` | Merged icon theme — Hatter base, Fluent file/folder icons |
+| `.themes/Catppuccin-Mauve-Dark/` | Vendored GTK theme linked into `~/.local/share/themes/` during GNOME setup |
 | `.local/share/fonts/Monaspace/` | MonaspiceAr Nerd Font Mono — Regular, Italic, Bold, BoldItalic |
 
 The fastfetch config includes `localip` and `publicip` modules. Remove them if you don't want those showing up in screenshots.
@@ -108,7 +134,11 @@ The fastfetch config includes `localip` and `publicip` modules. Remove them if y
 
 ## GNOME extensions
 
-Listed as of the included dconf dump. Install from [extensions.gnome.org](https://extensions.gnome.org) or via [Extension Manager](https://flathub.org/apps/com.mattjakeman.ExtensionManager).
+Listed as of the included dconf dump. `install.sh` resolves each extension
+against the detected GNOME Shell major version through
+[extensions.gnome.org](https://extensions.gnome.org), validates the returned
+UUID and download path, installs the zip with `gnome-extensions install --force`,
+and enables the extension where the current session allows it.
 
 - [Blur my Shell](https://extensions.gnome.org/extension/3193/blur-my-shell/) — disable app blur if it conflicts with workspace animations on GNOME 49
 - [Dash to Dock](https://extensions.gnome.org/extension/307/dash-to-dock/)
