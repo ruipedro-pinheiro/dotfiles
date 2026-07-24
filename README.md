@@ -8,29 +8,26 @@ My personal GNOME setup — not meant to be used as-is, but feel free to poke ar
 
 ## Requirements
 
-`install.sh` requires no sudo — it only creates symlinks into `~`. The following tools need to be available first.
+`install.sh` requires no sudo. It creates symlinks, initializes the Neovim
+submodule, and installs user-local CLI tools. The following tools need to be
+available first.
 
 **Fedora:**
 ```bash
-sudo dnf install kitty neovim fastfetch eza bat lazygit zsh
+sudo dnf install kitty zsh git curl tar python3
 ```
 
-**Ubuntu:** tools are expected to already be present. `install.sh` handles the rest without sudo.
+**Ubuntu:** Kitty and zsh must be available. The standard 42 environment also
+needs `git`, `curl`, `tar`, `python3`, `find`, `install`, and `sha256sum`.
+
+The installer fetches verified current releases of bat, eza, Fastfetch,
+Starship, zoxide, LazyGit, LazyCommit, and portable GDB. It also initializes Oh
+My Zsh, zsh-autosuggestions, zsh-syntax-highlighting, and Neovim nightly.
 
 After installing zsh, set it as your default shell and log out for the change to take effect:
 ```bash
 chsh -s $(which zsh)
 ```
-
-**Separate installers (required on both distros):**
-
-> Run `install.sh` before running the Oh My Zsh installer — Oh My Zsh will offer to replace `.zshrc` and will overwrite the one from this repo if you let it. Say no when prompted.
-
-- [Starship](https://starship.rs/) — `curl -sS https://starship.rs/install.sh | sh`
-- [Oh My Zsh](https://ohmyz.sh/) — `sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"`
-- [zoxide](https://github.com/ajeetdsouza/zoxide) — `curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh`
-- [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) — `git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions`
-- [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) — `git clone https://github.com/zsh-users/zsh-syntax-highlighting ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting`
 
 **GNOME theme and cursor** (not in any package manager — install manually):
 - GTK: [Catppuccin GTK](https://github.com/catppuccin/gtk) — install `Catppuccin-Mauve-Dark` to `~/.local/share/themes/`
@@ -41,14 +38,27 @@ chsh -s $(which zsh)
 ## Install
 
 ```bash
-git clone https://github.com/ruipedro-pinheiro/dotfiles ~/dotfiles
+git clone --recurse-submodules https://github.com/ruipedro-pinheiro/dotfiles ~/dotfiles
 cd ~/dotfiles
 ./install.sh
 ```
 
-Creates symlinks pointing into `~/dotfiles` — `.zshrc` and `.bashrc` land in `~`, everything else goes under `~/.config/` or `~/.local/share/`. The font cache is updated automatically.
+Creates symlinks pointing into `~/dotfiles` — `.zshrc` and `.bashrc` land in
+`~`, everything else goes under `~/.config/` or `~/.local/share/`. A clone made
+without `--recurse-submodules` is supported: `install.sh` initializes the
+submodules automatically. The font cache is updated automatically.
 
-Before replacing anything, existing files are moved to `~/.local/state/dotfiles-install-backups/<YYYYMMDD-HHMMSS>/`. Running it again is safe: symlinks that already point to the right target are skipped; anything that drifted gets a new timestamped backup before being replaced.
+Neovim comes from the
+[`ruipedro-pinheiro/nvim`](https://github.com/ruipedro-pinheiro/nvim)
+submodule. Its installer removes previous Neovim data and installs the latest
+nightly plus its isolated toolchain. Stale user-local copies of LazyGit,
+LazyCommit, zoxide, and GDB are removed, then replaced with the latest verified
+GitHub releases in `~/.local/bin`. System installations are left untouched.
+
+Before replacing anything, existing files are moved to
+`~/.local/state/dotfiles-install-backups/<YYYYMMDD-HHMMSS>/`. Only the newest
+backup is retained to fit restricted home quotas. The installer also requires
+at least 2 GiB of free space before downloading or changing the setup.
 
 To apply GNOME settings, install all extensions listed in the [GNOME extensions](#gnome-extensions) section first, then:
 
@@ -67,9 +77,12 @@ Loads dconf dumps for interface settings (GTK theme, cursor, icon theme, font), 
 | `.zshrc` | Starship + zoxide init, eza/bat/lazygit aliases, runs fastfetch on first interactive shell start |
 | `.bashrc` | Re-execs zsh — nothing else runs |
 | `.config/starship.toml` | 2-line prompt — fill bar pushes time to the right edge, `╰─` connector on line 2 |
-| `.config/kitty/` | Catppuccin Mocha, Monaspace Argon 15pt |
+| `.config/kitty/` | Catppuccin Mocha, Monaspace Argon 16pt |
 | `.config/fastfetch/` | kitty-direct image protocol, Catppuccin colors — active image is `wallhaven-pol5qp-fastfetch-portrait-soft.png`, other variants included |
-| `.config/nvim/` | LazyVim base + blink.cmp, conform, nvim-surround, wakatime (requires a [WakaTime API key](https://wakatime.com/settings/account) in `~/.wakatime.cfg`) |
+| `.config/nvim/` | Git submodule for the standalone Neovim nightly configuration and installer |
+| `.config/lazygit/` | LazyGit commands backed by LazyCommit |
+| `.config/zed/` | Zed editor theme, Vim mode, and privacy settings |
+| `.config/btop/` | btop layout, theme, and monitoring preferences |
 | `.config/gnome/` | dconf dumps + `apply-gnome.sh` |
 | `.config/background` | Wallpaper file — `install.sh` links it into `~/.config/background`; `apply-gnome.sh` points GNOME at that path |
 | `.local/share/icons/Hatter-FluentFiles/` | Merged icon theme — Hatter base, Fluent file/folder icons |

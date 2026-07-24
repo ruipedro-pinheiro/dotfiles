@@ -9,6 +9,7 @@ fi
 
 # Oh My Zsh
 export ZSH="$HOME/.oh-my-zsh"
+export ZSH_CUSTOM="$HOME/.local/share/oh-my-zsh-custom"
 ZSH_THEME=""
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
@@ -29,10 +30,8 @@ eval "$(zoxide init zsh)"
 # Prompt
 eval "$(starship init zsh)"
 
-# Claude Code — force extended thinking
-export MAX_THINKING_TOKENS=100000
-export CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1
-export CLAUDE_CODE_EFFORT_LEVEL=max
+# Claude Code ai-bridge channel
+alias claude='claude --dangerously-load-development-channels server:ai-bridge-channel'
 
 # Aliases
 alias cleanup="~/bin/cleanup.sh"
@@ -46,5 +45,19 @@ alias lt="eza --tree --icons --level=2"
 alias cat="bat --paging=never"
 alias lg="lazygit"
 alias norm="~/.local/bin/betternorm"
+
 # opencode
-export PATH=/home/pedro/.opencode/bin:$PATH
+export PATH="$HOME/.opencode/bin:$PATH"
+
+# Fixed server port so the agent-bridge daemon can wake the TUI.
+# Only applies to the bare TUI launch; subcommands (mcp, serve, run...) break
+# if --port is inserted before them, so they pass through untouched.
+opencode() {
+  if [ $# -eq 0 ]; then
+    command opencode --port 14096
+  else
+    command opencode "$@"
+  fi
+}
+
+export PATH="$PATH:$HOME/.spicetify"

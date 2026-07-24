@@ -1,0 +1,27 @@
+customCommands:
+  - key: "<c-a>"
+    description: "AI commit (direct)"
+    context: "files"
+    command: 'git commit -m {{.Form.Msg | quote}}'
+    prompts:
+      - type: "menuFromCommand"
+        title: "AI commits"
+        key: "Msg"
+        command: "lazycommit commit"
+        filter: "^(?P<raw>.+)$"
+        valueFormat: "{{ .raw }}"
+        labelFormat: "{{ .raw | green }}"
+
+  - key: "<c-e>"
+    description: "AI commit (edit in $EDITOR)"
+    context: "files"
+    output: terminal
+    command: 'lazycommit-edit {{.Form.Msg | quote}}'
+    prompts:
+      - type: "menuFromCommand"
+        title: "AI commits"
+        key: "Msg"
+        command: "lazycommit commit"
+        filter: "^(?P<raw>.+)$"
+        valueFormat: "{{ .raw }}"
+        labelFormat: "{{ .raw | green }}"
