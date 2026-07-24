@@ -5,6 +5,7 @@ repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 install_sh="$repo_dir/install.sh"
 apply_gnome_sh="$repo_dir/.config/gnome/apply-gnome.sh"
 zshrc="$repo_dir/.zshrc"
+zshenv="$repo_dir/.zshenv"
 gitmodules="$repo_dir/.gitmodules"
 
 fail() {
@@ -28,6 +29,7 @@ bash -n "$install_sh"
 assert_contains "$install_sh" "TARGET_HOME='/home/rpinheir'" '42 installation must target /home/rpinheir explicitly'
 bash -n "$apply_gnome_sh"
 zsh -n "$zshrc"
+zsh -n "$zshenv"
 
 assert_contains "$gitmodules" 'path = \.config/nvim' 'nvim must be a git submodule'
 assert_contains "$gitmodules" 'url = https://github\.com/ruipedro-pinheiro/nvim\.git' 'nvim submodule must use the canonical repo'
@@ -67,6 +69,7 @@ assert_not_contains "$install_sh" 'ghostty' 'Ghostty must not be managed by this
 assert_contains "$install_sh" 'for tool in bat eza fastfetch gdb lazygit lazycommit lazycommit-edit starship zoxide' 'stale local tool cleanup list is incomplete'
 assert_contains "$install_sh" 'copy_item "\$REPO_DIR/\.oh-my-zsh"' 'Oh My Zsh submodule must be copied'
 assert_contains "$install_sh" 'copy_item "\$REPO_DIR/\.zshrc" "\$HOME/\.zshrc"' 'system Zsh configuration must be copied'
+assert_contains "$install_sh" 'copy_item "\$REPO_DIR/\.zshenv" "\$HOME/\.zshenv"' 'system Zsh environment must be copied'
 assert_contains "$install_sh" 'Zsh configuration installed:' 'installer log must show the copied zshrc size'
 assert_contains "$install_sh" 'copy_item "\$REPO_DIR/\.config/kitty" "\$HOME/\.config/kitty"' 'system Kitty configuration must be copied'
 assert_not_contains "$install_sh" 'zsh-bin|kovidgoyal/kitty|kitty-[^ ]*x86_64' 'installer must not download system-provided Zsh or Kitty binaries'
@@ -152,6 +155,7 @@ assert_contains "$zshrc" 'command -v starship' '.zshrc must guard optional Stars
 assert_contains "$zshrc" 'command -v eza' '.zshrc must not replace ls when optional eza is unavailable'
 assert_contains "$zshrc" 'command -v bat' '.zshrc must not replace cat when optional bat is unavailable'
 assert_contains "$zshrc" 'command -v lazygit' '.zshrc must not define lg when optional LazyGit is unavailable'
+assert_contains "$zshenv" '^export PATH="/home/rpinheir/\.local/bin:' '.zshenv must expose installed binaries before .zshrc loads'
 assert_not_contains "$repo_dir/README.md" '~/dotfiles' 'README must keep the home directory root clean'
 assert_contains "$repo_dir/README.md" '\$HOME/\.local/share/dotfiles' 'README must use the XDG data location'
 assert_contains "$repo_dir/README.md" 'Kitty and Zsh use the versions already installed by 42' 'README must state that Kitty and Zsh binaries remain system-provided'

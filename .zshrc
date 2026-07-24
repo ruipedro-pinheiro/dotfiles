@@ -17,7 +17,6 @@ plugins=(git)
 [ -r "$ZSH/oh-my-zsh.sh" ] && source "$ZSH/oh-my-zsh.sh"
 
 # Environment
-export PATH="$HOME/.local/bin:$HOME/go/bin:$HOME/.bun/bin:$PATH"
 export TERMINAL=kitty
 export EDITOR=nvim
 export VISUAL=nvim

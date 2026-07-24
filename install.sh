@@ -459,6 +459,11 @@ activate_tools() {
   cleanup_stale_local_tools
   for tool in bat eza fastfetch gdb lazygit lazycommit starship zoxide; do
     install -m 0755 "$STAGED_BIN/$tool" "$HOME/.local/bin/$tool"
+    if [ -x "$HOME/.local/bin/$tool" ]; then
+      printf 'Installed executable: %s\n' "$HOME/.local/bin/$tool"
+    else
+      printf 'WARNING: executable missing after install: %s\n' "$HOME/.local/bin/$tool" >&2
+    fi
   done
   install -m 0755 "$REPO_DIR/bin/lazycommit-edit" "$HOME/.local/bin/lazycommit-edit"
 }
@@ -466,6 +471,7 @@ activate_tools() {
 link_core_dotfiles() {
   log_phase 'Installing core dotfiles'
   copy_item "$REPO_DIR/.bashrc" "$HOME/.bashrc"
+  copy_item "$REPO_DIR/.zshenv" "$HOME/.zshenv"
   copy_item "$REPO_DIR/.zshrc" "$HOME/.zshrc"
   printf 'Zsh configuration installed: %s bytes at %s\n' "$(wc -c < "$HOME/.zshrc")" "$HOME/.zshrc"
   copy_item "$REPO_DIR/.config/starship.toml" "$HOME/.config/starship.toml"

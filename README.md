@@ -25,7 +25,7 @@ exec zsh
 
 ## Installed files
 
-- Zsh, Oh My Zsh, shell plugins, Starship, zoxide, and CLI tools
+- Zsh environment and PATH, Oh My Zsh, shell plugins, Starship, zoxide, and CLI tools
 - Kitty, Fastfetch, LazyGit, Zed, and btop configuration
 - Latest Neovim nightly from the `.config/nvim` submodule
 - Catppuccin in `~/.themes`, Hatter and Bibata in `~/.icons`, Monaspace in `~/.fonts`
