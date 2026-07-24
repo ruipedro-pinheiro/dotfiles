@@ -103,6 +103,12 @@ grep -q 'Missing required GNOME asset' "$temp_dir/err" || fail 'missing asset er
 [ ! -s "$temp_dir/commands.log" ] || fail 'preflight failure must not mutate dconf or gsettings'
 
 temp_dir="$(with_fixture)"
+grep -Fvx 'clipboard-indicator@tudmotu.com' "$temp_dir/extensions.txt" > "$temp_dir/extensions.filtered"
+mv "$temp_dir/extensions.filtered" "$temp_dir/extensions.txt"
+run_apply "$temp_dir" env >"$temp_dir/out" 2>"$temp_dir/err"
+grep -q 'GNOME extension unavailable: clipboard-indicator@tudmotu.com' "$temp_dir/err" || fail 'missing extensions must warn without blocking desktop settings'
+
+temp_dir="$(with_fixture)"
 run_apply "$temp_dir" env >/"$temp_dir/out" 2>"$temp_dir/err"
 grep -q 'dconf load /org/gnome/desktop/background/' "$temp_dir/commands.log" || fail 'wallpaper dconf must apply by default'
 grep -q 'gsettings set org.gnome.desktop.background picture-uri file://' "$temp_dir/commands.log" || fail 'wallpaper gsettings must apply by default'

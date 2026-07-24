@@ -24,12 +24,10 @@ Kitty and Zsh are system prerequisites; `install.sh` only links their configurat
 
 The installer fetches verified current releases of bat, eza, Fastfetch,
 Starship, zoxide, LazyGit, LazyCommit, and portable GDB. It also initializes Oh
-My Zsh, zsh-autosuggestions, zsh-syntax-highlighting, and Neovim nightly. In a
-GNOME session, it links the vendored Catppuccin GTK theme, installs the verified
-Bibata cursor archive, installs the configured GNOME extensions for the detected
-GNOME Shell major version, enables extensions where possible, and loads GNOME
-settings. Missing GNOME commands outside GNOME produce a short warning and leave
-the rest of the install unaffected.
+My Zsh, zsh-autosuggestions, zsh-syntax-highlighting, and Neovim nightly. GNOME
+42 extensions, Bibata, Catppuccin, and Hatter assets are bundled in the repository
+and install without extensions.gnome.org. Failures from optional extensions or
+GNOME settings do not block shell, editor, theme, cursor, icon, or font setup.
 
 ---
 
@@ -81,8 +79,8 @@ Desktop-only recovery skips shell plugins, CLI tools, and the Neovim rebuild:
 "$HOME/.local/share/dotfiles/install.sh" --repair-desktop
 ```
 
-Each run truncates and rewrites `~/.local/state/dotfiles-install.log` with clear
-phase messages and command failures.
+Each run truncates and rewrites `~/.local/state/dotfiles-install.log`. Failures
+include the command, source line, component, and exit status.
 
 `~/.config/gnome/apply-gnome.sh` can also be run later. It loads dconf dumps for
 interface settings (GTK theme, cursor, icon theme, font), window manager

@@ -22,6 +22,7 @@ if command -v tee >/dev/null 2>&1; then
 else
   exec >> "$LOG_FILE" 2>&1
 fi
+trap 'status=$?; printf "ERROR: install.sh:%s exited %s while running: %s\n" "$LINENO" "$status" "$BASH_COMMAND" >&2; exit "$status"' ERR
 
 log_phase() {
   printf '\n==> %s\n' "$1"
@@ -279,15 +280,13 @@ preflight_gnome_session_write() {
 }
 
 stage_bibata_cursor() {
-  local url checksum archive staged_cursor
+  local checksum archive staged_cursor
 
-  require_commands curl python3 sha256sum
-  url='https://github.com/ful1e5/Bibata_Cursor/releases/download/v2.0.7/Bibata-Modern-Ice.tar.xz'
+  require_commands python3 sha256sum
   checksum='a68cae60c4dc706350e194ebc91c5fe48bc7bc9d59e119555834a2a7ee5078ef'
-  archive="$STAGED_GNOME/Bibata-Modern-Ice.tar.xz"
+  archive="$REPO_DIR/assets/gnome-42/Bibata-Modern-Ice.tar.xz"
   staged_cursor="$STAGED_GNOME/Bibata-Modern-Ice"
 
-  curl -fsSL "$url" -o "$archive"
   printf '%s  %s\n' "$checksum" "$archive" | sha256sum -c -
   python3 "$REPO_DIR/scripts/extract-cursor-theme.py" \
     "$archive" 'Bibata-Modern-Ice' "$staged_cursor"
@@ -299,10 +298,22 @@ stage_gnome_extension() {
   local shell_major="$3"
   local metadata download_url zip
 
-  metadata="$(curl -fsSL "https://extensions.gnome.org/extension-info/?pk=$extension_id&shell_version=$shell_major")"
-  download_url="$(printf '%s' "$metadata" | python3 "$REPO_DIR/scripts/gnome-extension-resolver.py" "$uuid")"
+  printf 'Resolving GNOME extension: %s\n' "$uuid"
+  metadata="$(curl --connect-timeout 10 --max-time 30 -fsSL "https://extensions.gnome.org/extension-info/?pk=$extension_id&shell_version=$shell_major")" || return
+  download_url="$(printf '%s' "$metadata" | python3 "$REPO_DIR/scripts/gnome-extension-resolver.py" "$uuid")" || return
   zip="$STAGED_GNOME/$uuid.zip"
-  curl -fsSL "$download_url" -o "$zip"
+  curl --connect-timeout 10 --max-time 30 -fsSL "$download_url" -o "$zip" || return
+}
+
+stage_vendored_gnome_extension() {
+  local uuid="$1"
+  local source="$REPO_DIR/assets/gnome-42/extensions/$uuid.zip"
+
+  if [ ! -s "$source" ]; then
+    printf 'GNOME extension download skipped: missing bundled %s\n' "$uuid" >&2
+    return
+  fi
+  install -m 0644 "$source" "$STAGED_GNOME/$uuid.zip"
 }
 
 stage_gnome_extensions() {
@@ -310,15 +321,29 @@ stage_gnome_extensions() {
 
   require_commands curl gnome-shell python3
   shell_major="$(gnome_shell_major)"
-  stage_gnome_extension 3193 'blur-my-shell@aunetx' "$shell_major"
-  stage_gnome_extension 307 'dash-to-dock@micxgx.gmail.com' "$shell_major"
-  stage_gnome_extension 19 'user-theme@gnome-shell-extensions.gcampax.github.com' "$shell_major"
-  stage_gnome_extension 3843 'just-perfection-desktop@just-perfection' "$shell_major"
-  stage_gnome_extension 517 'caffeine@patapon.info' "$shell_major"
-  stage_gnome_extension 779 'clipboard-indicator@tudmotu.com' "$shell_major"
-  stage_gnome_extension 615 'appindicatorsupport@rgcjonas.gmail.com' "$shell_major"
-  stage_gnome_extension 8 'places-menu@gnome-shell-extensions.gcampax.github.com' "$shell_major"
-  stage_gnome_extension 6 'apps-menu@gnome-shell-extensions.gcampax.github.com' "$shell_major"
+  if [ "$shell_major" = 42 ]; then
+    (cd "$REPO_DIR" && sha256sum -c assets/gnome-42/SHA256SUMS)
+    stage_vendored_gnome_extension 'blur-my-shell@aunetx'
+    stage_vendored_gnome_extension 'dash-to-dock@micxgx.gmail.com'
+    stage_vendored_gnome_extension 'user-theme@gnome-shell-extensions.gcampax.github.com'
+    stage_vendored_gnome_extension 'just-perfection-desktop@just-perfection'
+    stage_vendored_gnome_extension 'caffeine@patapon.info'
+    stage_vendored_gnome_extension 'clipboard-indicator@tudmotu.com'
+    stage_vendored_gnome_extension 'appindicatorsupport@rgcjonas.gmail.com'
+    stage_vendored_gnome_extension 'places-menu@gnome-shell-extensions.gcampax.github.com'
+    stage_vendored_gnome_extension 'apps-menu@gnome-shell-extensions.gcampax.github.com'
+    return
+  fi
+
+  if ! stage_gnome_extension 3193 'blur-my-shell@aunetx' "$shell_major"; then printf 'GNOME extension download skipped: %s\n' 'blur-my-shell@aunetx' >&2; fi
+  if ! stage_gnome_extension 307 'dash-to-dock@micxgx.gmail.com' "$shell_major"; then printf 'GNOME extension download skipped: %s\n' 'dash-to-dock@micxgx.gmail.com' >&2; fi
+  if ! stage_gnome_extension 19 'user-theme@gnome-shell-extensions.gcampax.github.com' "$shell_major"; then printf 'GNOME extension download skipped: %s\n' 'user-theme@gnome-shell-extensions.gcampax.github.com' >&2; fi
+  if ! stage_gnome_extension 3843 'just-perfection-desktop@just-perfection' "$shell_major"; then printf 'GNOME extension download skipped: %s\n' 'just-perfection-desktop@just-perfection' >&2; fi
+  if ! stage_gnome_extension 517 'caffeine@patapon.info' "$shell_major"; then printf 'GNOME extension download skipped: %s\n' 'caffeine@patapon.info' >&2; fi
+  if ! stage_gnome_extension 779 'clipboard-indicator@tudmotu.com' "$shell_major"; then printf 'GNOME extension download skipped: %s\n' 'clipboard-indicator@tudmotu.com' >&2; fi
+  if ! stage_gnome_extension 615 'appindicatorsupport@rgcjonas.gmail.com' "$shell_major"; then printf 'GNOME extension download skipped: %s\n' 'appindicatorsupport@rgcjonas.gmail.com' >&2; fi
+  if ! stage_gnome_extension 8 'places-menu@gnome-shell-extensions.gcampax.github.com' "$shell_major"; then printf 'GNOME extension download skipped: %s\n' 'places-menu@gnome-shell-extensions.gcampax.github.com' >&2; fi
+  if ! stage_gnome_extension 6 'apps-menu@gnome-shell-extensions.gcampax.github.com' "$shell_major"; then printf 'GNOME extension download skipped: %s\n' 'apps-menu@gnome-shell-extensions.gcampax.github.com' >&2; fi
 }
 
 stage_gnome_assets() {
@@ -348,7 +373,14 @@ activate_gnome_extension() {
   local uuid="$1"
   local zip="$STAGED_GNOME/$uuid.zip"
 
-  gnome-extensions install --force "$zip"
+  if [ ! -s "$zip" ]; then
+    printf 'GNOME extension install skipped: %s\n' "$uuid" >&2
+    return
+  fi
+  if ! gnome-extensions install --force "$zip"; then
+    printf 'GNOME extension install skipped: %s\n' "$uuid" >&2
+    return
+  fi
   if ! gnome-extensions enable "$uuid"; then
     printf 'GNOME extension enable deferred until session restart: %s\n' "$uuid" >&2
   fi
@@ -371,7 +403,9 @@ activate_gnome_customization() {
   activate_gnome_extension 'appindicatorsupport@rgcjonas.gmail.com'
   activate_gnome_extension 'places-menu@gnome-shell-extensions.gcampax.github.com'
   activate_gnome_extension 'apps-menu@gnome-shell-extensions.gcampax.github.com'
-  "$REPO_DIR/.config/gnome/apply-gnome.sh"
+  if ! "$REPO_DIR/.config/gnome/apply-gnome.sh"; then
+    printf 'GNOME settings apply failed; other components remain installed.\n' >&2
+  fi
 }
 
 install_gnome_customization() {
@@ -433,27 +467,27 @@ refresh_fonts() {
 
 full_install() {
   require_free_space
-  stage_all_assets
   prune_backups
-  log_phase 'Preparing Neovim'
-  prepare_nvim
+  link_core_dotfiles
+  refresh_fonts
+  stage_all_assets
   log_phase 'Preparing shell plugins'
   prepare_shell
-  link_core_dotfiles
   activate_tools
   install_gnome_customization
+  log_phase 'Preparing Neovim'
+  prepare_nvim
   prune_backups
-  refresh_fonts
 }
 
 repair_desktop() {
   require_free_space
-  stage_gnome_assets required
   prune_backups
   link_core_dotfiles
+  refresh_fonts
+  stage_gnome_assets required
   activate_gnome_customization
   prune_backups
-  refresh_fonts
 }
 
 case "${1:-}" in

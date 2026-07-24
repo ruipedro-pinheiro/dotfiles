@@ -63,7 +63,7 @@ preflight_gnome_assets() {
   installed_extensions="$(gnome-extensions list)"
   for extension in "${REQUIRED_EXTENSIONS[@]}"; do
     if ! printf '%s\n' "$installed_extensions" | grep -Fxq -- "$extension"; then
-      fail_preflight "Missing required GNOME extension: $extension."
+      printf 'GNOME extension unavailable: %s\n' "$extension" >&2
     fi
   done
 }
