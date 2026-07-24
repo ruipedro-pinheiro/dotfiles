@@ -9,7 +9,7 @@ fi
 
 # Oh My Zsh
 export ZSH="$HOME/.oh-my-zsh"
-export ZSH_CUSTOM="$HOME/.local/share/oh-my-zsh-custom"
+export ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
 ZSH_THEME=""
 plugins=(git)
 [ -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ] && plugins+=(zsh-autosuggestions)

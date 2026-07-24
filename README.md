@@ -28,7 +28,7 @@ exec zsh
 - Zsh, Oh My Zsh, shell plugins, Starship, zoxide, and CLI tools
 - Kitty, Fastfetch, LazyGit, Zed, and btop configuration
 - Latest Neovim nightly from the `.config/nvim` submodule
-- Catppuccin GTK, Hatter icons, Bibata cursor, Monaspace fonts, and wallpaper
+- Catppuccin in `~/.themes`, Hatter and Bibata in `~/.icons`, Monaspace in `~/.fonts`
 - Bundled GNOME 42 extensions and dconf settings
 
 Kitty and Zsh use the versions already installed by 42. The installer does not use sudo.

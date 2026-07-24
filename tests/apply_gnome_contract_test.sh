@@ -48,13 +48,13 @@ prepare_home_assets() {
   local home_dir="$1"
   mkdir -p \
     "$home_dir/.config" \
-    "$home_dir/.local/share/themes/Catppuccin-Mauve-Dark" \
-    "$home_dir/.local/share/icons/Bibata-Modern-Ice" \
-    "$home_dir/.local/share/icons/Hatter-FluentFiles"
+    "$home_dir/.themes/Catppuccin-Mauve-Dark" \
+    "$home_dir/.icons/Bibata-Modern-Ice" \
+    "$home_dir/.icons/Hatter-FluentFiles"
   printf 'wallpaper\n' > "$home_dir/.config/background"
-  printf '[theme]\n' > "$home_dir/.local/share/themes/Catppuccin-Mauve-Dark/index.theme"
-  printf '[cursor]\n' > "$home_dir/.local/share/icons/Bibata-Modern-Ice/index.theme"
-  printf '[icons]\n' > "$home_dir/.local/share/icons/Hatter-FluentFiles/index.theme"
+  printf '[theme]\n' > "$home_dir/.themes/Catppuccin-Mauve-Dark/index.theme"
+  printf '[cursor]\n' > "$home_dir/.icons/Bibata-Modern-Ice/index.theme"
+  printf '[icons]\n' > "$home_dir/.icons/Hatter-FluentFiles/index.theme"
 }
 
 write_extensions_list() {
@@ -95,7 +95,7 @@ with_fixture() {
 }
 
 temp_dir="$(with_fixture)"
-rm -f "$temp_dir/home/.local/share/themes/Catppuccin-Mauve-Dark/index.theme"
+rm -f "$temp_dir/home/.themes/Catppuccin-Mauve-Dark/index.theme"
 if run_apply "$temp_dir" env >/"$temp_dir/out" 2>"$temp_dir/err"; then
   fail 'apply-gnome must fail when required theme assets are missing'
 fi

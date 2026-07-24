@@ -84,7 +84,7 @@ assert_contains "$install_sh" 'for path in "\$HOME" "\$TMP_ROOT"' 'temporary fil
 assert_contains "$install_sh" 'fastfetch-musl-amd64' 'fastfetch must use the self-contained musl build'
 assert_contains "$install_sh" 'extract-release-binary\.py' 'safe release extractor must be used'
 assert_not_contains "$install_sh" 'tar -x' 'release archives must not be extracted as directory trees'
-assert_contains "$install_sh" 'copy_item "\$REPO_DIR/\.themes/Catppuccin-Mauve-Dark" "\$HOME/\.local/share/themes/Catppuccin-Mauve-Dark"' 'Catppuccin GTK theme must be copied automatically'
+assert_contains "$install_sh" 'copy_item "\$REPO_DIR/\.themes/Catppuccin-Mauve-Dark" "\$HOME/\.themes/Catppuccin-Mauve-Dark"' 'Catppuccin GTK theme must be copied automatically'
 assert_not_contains "$install_sh" 'ln -s' 'installer must copy configuration instead of creating symlinks'
 assert_contains "$install_sh" '"\$HOME/\.themes/Catppuccin-Mauve-Dark"' 'Catppuccin GTK theme must support the GNOME 42 legacy path'
 assert_contains "$install_sh" '"\$HOME/\.icons/Hatter-FluentFiles"' 'Hatter icons must support the GNOME 42 legacy path'
@@ -124,7 +124,7 @@ assert_contains "$apply_gnome_sh" 'trap .*rollback_dconf.*ERR' 'apply-gnome must
 assert_contains "$install_sh" 'dotfiles-install\.log' 'installer must keep a persistent per-run log'
 assert_contains "$install_sh" '--repair-desktop' 'installer must provide desktop repair mode'
 assert_contains "$install_sh" 'stage_gnome_assets required' 'desktop repair must run outside an active GNOME session'
-assert_contains "$install_sh" 'stage_all_assets' 'installer must stage assets before HOME mutation'
+assert_contains "$install_sh" 'stage_all_assets' 'installer must stage downloadable assets'
 assert_contains "$install_sh" 'link_core_dotfiles' 'repair mode must relink core dotfiles including zshrc'
 assert_contains "$install_sh" 'Unknown argument' 'installer must reject unknown arguments'
 
@@ -133,7 +133,7 @@ activate_line="$(grep -n '^  activate_tools$' "$install_sh" | cut -d: -f1)"
 shell_line="$(grep -n '^  prepare_shell$' "$install_sh" | cut -d: -f1)"
 [ -n "$last_download_line" ] && [ -n "$activate_line" ] || fail 'tool staging order markers missing'
 [ "$last_download_line" -lt "$activate_line" ] || fail 'old tools must remain until every replacement is staged'
-[ -n "$shell_line" ] && [ "$last_download_line" -lt "$shell_line" ] || fail 'release failures must occur before shell configuration changes'
+[ -n "$shell_line" ] && [ "$shell_line" -lt "$last_download_line" ] || fail 'shell setup must occur before optional release downloads'
 
 stage_gnome_line="$(grep -n '^stage_gnome_assets()' "$install_sh" | cut -d: -f1)"
 link_core_line="$(grep -n '^link_core_dotfiles()' "$install_sh" | cut -d: -f1)"

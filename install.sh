@@ -148,7 +148,7 @@ cleanup_stale_local_tools() {
 }
 
 prepare_shell() {
-  local custom="$HOME/.local/share/oh-my-zsh-custom"
+  local custom="$HOME/.oh-my-zsh/custom"
   local autosuggestions="$custom/plugins/zsh-autosuggestions"
   local highlighting="$custom/plugins/zsh-syntax-highlighting"
   local staged_autosuggestions="$TMP_ROOT/zsh-autosuggestions"
@@ -387,10 +387,9 @@ activate_gnome_customization() {
   [ "$GNOME_ASSETS_STAGED" -eq 1 ] || return
 
   log_phase 'Activating GNOME desktop assets'
-  mkdir -p "$HOME/.local/share/icons" "$HOME/.local/share/themes"
-  backup_item "$HOME/.local/share/icons/Bibata-Modern-Ice"
-  mv "$STAGED_GNOME/Bibata-Modern-Ice" "$HOME/.local/share/icons/Bibata-Modern-Ice"
-  copy_item "$HOME/.local/share/icons/Bibata-Modern-Ice" "$HOME/.icons/Bibata-Modern-Ice"
+  mkdir -p "$HOME/.icons" "$HOME/.themes"
+  backup_item "$HOME/.icons/Bibata-Modern-Ice"
+  mv "$STAGED_GNOME/Bibata-Modern-Ice" "$HOME/.icons/Bibata-Modern-Ice"
 
   activate_gnome_extension 'blur-my-shell@aunetx'
   activate_gnome_extension 'dash-to-dock@micxgx.gmail.com'
@@ -452,17 +451,16 @@ link_core_dotfiles() {
   copy_item "$REPO_DIR/.config/lazygit" "$HOME/.config/lazygit"
   copy_item "$REPO_DIR/.config/zed" "$HOME/.config/zed"
   copy_item "$REPO_DIR/.config/btop" "$HOME/.config/btop"
-  copy_item "$REPO_DIR/.local/share/fonts/Monaspace" "$HOME/.local/share/fonts/Monaspace"
-  copy_item "$REPO_DIR/.local/share/icons/Hatter-FluentFiles" "$HOME/.local/share/icons/Hatter-FluentFiles"
+  copy_item "$REPO_DIR/.local/share/fonts/Monaspace" "$HOME/.fonts/Monaspace"
   copy_item "$REPO_DIR/.local/share/icons/Hatter-FluentFiles" "$HOME/.icons/Hatter-FluentFiles"
-  copy_item "$REPO_DIR/.themes/Catppuccin-Mauve-Dark" "$HOME/.local/share/themes/Catppuccin-Mauve-Dark"
   copy_item "$REPO_DIR/.themes/Catppuccin-Mauve-Dark" "$HOME/.themes/Catppuccin-Mauve-Dark"
 }
 
 refresh_fonts() {
   if command -v fc-cache >/dev/null 2>&1; then
     log_phase 'Refreshing font cache'
-    fc-cache -f "$HOME/.local/share/fonts" >/dev/null
+    fc-cache -f "$HOME/.fonts" >/dev/null
+    printf 'Kitty font resolved as: %s\n' "$(fc-match -f '%{family}\n' 'MonaspiceAr Nerd Font Mono' | head -n 1)"
   fi
 }
 
@@ -471,9 +469,9 @@ full_install() {
   prune_backups
   link_core_dotfiles
   refresh_fonts
-  stage_all_assets
   log_phase 'Preparing shell plugins'
   prepare_shell
+  stage_all_assets
   activate_tools
   install_gnome_customization
   log_phase 'Preparing Neovim'

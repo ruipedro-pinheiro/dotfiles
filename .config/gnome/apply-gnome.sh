@@ -56,9 +56,9 @@ preflight_gnome_assets() {
   if wallpaper_enabled; then
     require_file "$HOME/.config/background" 'bundled wallpaper'
   fi
-  require_file "$HOME/.local/share/themes/Catppuccin-Mauve-Dark/index.theme" 'Catppuccin GTK theme index'
-  require_file "$HOME/.local/share/icons/Bibata-Modern-Ice/index.theme" 'Bibata cursor index'
-  require_file "$HOME/.local/share/icons/Hatter-FluentFiles/index.theme" 'Hatter icon index'
+  require_file "$HOME/.themes/Catppuccin-Mauve-Dark/index.theme" 'Catppuccin GTK theme index'
+  require_file "$HOME/.icons/Bibata-Modern-Ice/index.theme" 'Bibata cursor index'
+  require_file "$HOME/.icons/Hatter-FluentFiles/index.theme" 'Hatter icon index'
 
   installed_extensions="$(gnome-extensions list)"
   for extension in "${REQUIRED_EXTENSIONS[@]}"; do
