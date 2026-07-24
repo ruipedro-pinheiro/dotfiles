@@ -234,6 +234,11 @@ install_release_binary() {
 
   python3 "$REPO_DIR/scripts/extract-release-binary.py" \
     "$archive" "$binary_name" "$STAGED_BIN/$binary_name"
+  if ! "$STAGED_BIN/$binary_name" --version >/dev/null 2>&1; then
+    printf 'Downloaded %s cannot run on this system; refusing activation.\n' "$binary_name" >&2
+    rm -f "$STAGED_BIN/$binary_name"
+    return 1
+  fi
   rm -rf "$tmp"
 }
 
@@ -263,11 +268,6 @@ install_latest_eza() {
 
 install_latest_fastfetch() {
   install_release_binary 'fastfetch-cli/fastfetch' 'fastfetch-linux-amd64\.tar\.gz' 'fastfetch'
-  if ! "$STAGED_BIN/fastfetch" --version; then
-    printf 'WARNING: staged Fastfetch cannot run on this system.\n' >&2
-    rm -f "$STAGED_BIN/fastfetch"
-    return 1
-  fi
 }
 
 install_latest_starship() {

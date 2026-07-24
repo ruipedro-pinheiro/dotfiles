@@ -110,21 +110,18 @@ grep -q 'GNOME extension unavailable: clipboard-indicator@tudmotu.com' "$temp_di
 
 temp_dir="$(with_fixture)"
 run_apply "$temp_dir" env >/"$temp_dir/out" 2>"$temp_dir/err"
-grep -q 'dconf load /org/gnome/desktop/background/' "$temp_dir/commands.log" || fail 'wallpaper dconf must apply by default'
-grep -q 'gsettings set org.gnome.desktop.background picture-uri file://' "$temp_dir/commands.log" || fail 'wallpaper gsettings must apply by default'
+if grep -q '/org/gnome/desktop/background/' "$temp_dir/commands.log"; then
+  fail 'wallpaper dconf must be skipped by default'
+fi
 [ -f "$temp_dir/state/dotfiles-gnome-dconf.snapshot" ] || fail 'dconf safety snapshot missing'
 
 temp_dir="$(with_fixture)"
-run_apply "$temp_dir" env APPLY_WALLPAPER=0 >/"$temp_dir/out" 2>"$temp_dir/err"
-if grep -q '/org/gnome/desktop/background/' "$temp_dir/commands.log"; then
-  fail 'wallpaper dconf must be skipped when APPLY_WALLPAPER=0'
-fi
-if grep -q 'org.gnome.desktop.background picture-uri' "$temp_dir/commands.log"; then
-  fail 'wallpaper gsettings must be skipped when APPLY_WALLPAPER=0'
-fi
+run_apply "$temp_dir" env APPLY_WALLPAPER=1 >/"$temp_dir/out" 2>"$temp_dir/err"
+grep -q 'dconf load /org/gnome/desktop/background/' "$temp_dir/commands.log" || fail 'wallpaper dconf must apply with APPLY_WALLPAPER=1'
+grep -q 'gsettings set org.gnome.desktop.background picture-uri file://' "$temp_dir/commands.log" || fail 'wallpaper gsettings must apply with APPLY_WALLPAPER=1'
 
 temp_dir="$(with_fixture)"
-if run_apply "$temp_dir" env DCONF_FAIL_ON_PREFIX=/org/gnome/desktop/background/ >/"$temp_dir/out" 2>"$temp_dir/err"; then
+if run_apply "$temp_dir" env APPLY_WALLPAPER=1 DCONF_FAIL_ON_PREFIX=/org/gnome/desktop/background/ >/"$temp_dir/out" 2>"$temp_dir/err"; then
   fail 'apply-gnome must fail when a dconf load fails'
 fi
 grep -q 'GNOME settings failed; restoring previous dconf snapshot' "$temp_dir/err" || fail 'dconf failure must trigger rollback message'
@@ -132,7 +129,7 @@ grep -q 'dconf reset -f /' "$temp_dir/commands.log" || fail 'dconf failure must 
 grep -q 'dconf load /$' "$temp_dir/commands.log" || fail 'dconf failure must restore the root snapshot'
 
 temp_dir="$(with_fixture)"
-if run_apply "$temp_dir" env DCONF_EMPTY_SNAPSHOT=1 DCONF_FAIL_ON_PREFIX=/org/gnome/desktop/background/ >"$temp_dir/out" 2>"$temp_dir/err"; then
+if run_apply "$temp_dir" env APPLY_WALLPAPER=1 DCONF_EMPTY_SNAPSHOT=1 DCONF_FAIL_ON_PREFIX=/org/gnome/desktop/background/ >"$temp_dir/out" 2>"$temp_dir/err"; then
   fail 'apply-gnome must fail when a dconf load fails with an empty original database'
 fi
 grep -q 'dconf reset -f /' "$temp_dir/commands.log" || fail 'an empty snapshot must still clear partially applied dconf keys'

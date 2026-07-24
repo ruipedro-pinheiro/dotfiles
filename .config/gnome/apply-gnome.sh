@@ -31,7 +31,7 @@ load_if_present() {
 }
 
 wallpaper_enabled() {
-  [ "${APPLY_WALLPAPER:-1}" != "0" ]
+  [ "${APPLY_WALLPAPER:-0}" = "1" ]
 }
 
 fail_preflight() {

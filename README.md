@@ -41,10 +41,10 @@ This skips Neovim, shell plugins, and CLI tool installation:
 bash "$HOME/.local/share/dotfiles/install.sh" --repair-desktop
 ```
 
-Keep the current wallpaper with:
+Apply the bundled wallpaper explicitly with:
 
 ```bash
-APPLY_WALLPAPER=0 bash "$HOME/.local/share/dotfiles/install.sh"
+APPLY_WALLPAPER=1 bash "$HOME/.local/share/dotfiles/install.sh"
 ```
 
 ## Log
