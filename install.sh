@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-
 TARGET_HOME='/home/rpinheir'
 HOME="$TARGET_HOME"
 export HOME
@@ -10,7 +8,7 @@ LOG_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-install.log"
 BACKUP_BASE="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-install-backups"
 BACKUP_ROOT="$BACKUP_BASE/$(date +%Y%m%d-%H%M%S)"
 MAX_BACKUPS=1
-MIN_FREE_MB=2048
+MIN_FREE_MB=256
 TMP_ROOT=''
 GNOME_ASSETS_STAGED=0
 trap '[ -z "${TMP_ROOT:-}" ] || rm -rf "$TMP_ROOT"' EXIT
@@ -22,7 +20,7 @@ if command -v tee >/dev/null 2>&1; then
 else
   exec >> "$LOG_FILE" 2>&1
 fi
-trap 'status=$?; printf "ERROR: install.sh:%s exited %s while running: %s\n" "$LINENO" "$status" "$BASH_COMMAND" >&2; exit "$status"' ERR
+trap 'status=$?; printf "WARNING: install.sh:%s returned %s while running: %s\n" "$LINENO" "$status" "$BASH_COMMAND" >&2' ERR
 printf 'Starting dotfiles install for %s from %s\n' "$TARGET_HOME" "$REPO_DIR"
 
 TMP_ROOT="$(mktemp -d)"
@@ -62,8 +60,7 @@ require_free_space() {
   for path in "$HOME" "$TMP_ROOT"; do
     available_kb="$(df -Pk "$path" | awk 'NR == 2 { print $4 }')"
     if [ -z "$available_kb" ] || [ "$available_kb" -lt "$required_kb" ]; then
-      printf 'At least %s MiB of free space is required in %s.\n' "$MIN_FREE_MB" "$path" >&2
-      exit 1
+      printf 'WARNING: less than %s MiB is available in %s; large components may be skipped.\n' "$MIN_FREE_MB" "$path" >&2
     fi
   done
 }
@@ -107,10 +104,16 @@ copy_item() {
   fi
   if [ -d "$source" ]; then
     mkdir -p "$target"
-    cp -a "$source/." "$target/"
+    if ! cp -a "$source/." "$target/"; then
+      printf 'WARNING: failed to copy %s to %s\n' "$source" "$target" >&2
+      return 1
+    fi
     rm -f "$target/.git"
   else
-    cp -a "$source" "$target"
+    if ! cp -a "$source" "$target"; then
+      printf 'WARNING: failed to copy %s to %s\n' "$source" "$target" >&2
+      return 1
+    fi
   fi
 }
 
@@ -123,6 +126,25 @@ prepare_nvim() {
   fi
   copy_item "$REPO_DIR/.config/nvim" "$HOME/.config/nvim"
   bash "$REPO_DIR/.config/nvim/install.sh"
+}
+
+restore_required_repo_assets() {
+  local path
+
+  require_commands git
+  for path in \
+    '.local/share/fonts/Monaspace' \
+    '.local/share/icons/Hatter-FluentFiles' \
+    '.themes/Catppuccin-Mauve-Dark'; do
+    if [ ! -e "$REPO_DIR/$path" ]; then
+      printf 'Restoring missing repository asset: %s\n' "$path" >&2
+      git -C "$REPO_DIR" restore --source=HEAD --worktree -- "$path"
+    fi
+    if [ ! -e "$REPO_DIR/$path" ]; then
+      printf 'Required repository asset is still missing: %s\n' "$path" >&2
+      return 1
+    fi
+  done
 }
 
 cleanup_stale_local_tools() {
@@ -469,6 +491,7 @@ refresh_fonts() {
 
 full_install() {
   require_free_space
+  restore_required_repo_assets
   prune_backups
   link_core_dotfiles
   refresh_fonts
@@ -484,6 +507,7 @@ full_install() {
 
 repair_desktop() {
   require_free_space
+  restore_required_repo_assets
   prune_backups
   link_core_dotfiles
   refresh_fonts

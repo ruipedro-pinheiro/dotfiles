@@ -1,6 +1,6 @@
 # dotfiles
 
-Personal GNOME and development setup for Fedora and Ubuntu 24.04 at 42.
+Personal GNOME and development setup for Ubuntu 22.04, GNOME 42, Zsh 5.8.1, and Bash 5.1 at 42.
 
 ## Update and reinstall
 
